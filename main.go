@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const version = "0.1.0"
+const version = "0.2.0"
 
 var (
 	mainMenu      ui.UI
@@ -26,6 +26,7 @@ var (
 	fileSelector  *file.FileSelector
 	statusTimer   *time.Timer
 	errTextEditor nucular.TextEditor
+	fs            *file.FileSelector
 )
 
 func main() {
@@ -120,7 +121,8 @@ func updateWindow(w *nucular.Window) {
 	switch global.GetCurrentShowing() {
 	case global.LoadPR:
 		var loaded bool
-		if loaded, err = fileSelector.DrawLoad(w); err != nil {
+		fs = file.NewFileSelector()
+		if loaded, err = fs.DrawLoad(w); err != nil {
 			if err.Error() == "Cancelled" {
 				err = nil
 			} else {

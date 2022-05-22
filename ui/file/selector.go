@@ -13,7 +13,9 @@ import (
 	"pr_save_editor/io/pr"
 )
 
-type FileSelector struct{}
+type FileSelector struct {
+	DirFiles []fs.FileInfo
+}
 
 var PrIO *pr.PR
 
@@ -29,13 +31,13 @@ func NewFileSelector() *FileSelector {
 func (fs *FileSelector) DrawLoad(w *nucular.Window) (loaded bool, err error) {
 	dir := io.GetConfig().GetDir(global.GetSaveType())
 	if dir == "" {
-		if dir, global.DirFiles, err = io.OpenDirAndFileDialog(global.GetSaveType()); err != nil {
+		if dir, fs.DirFiles, err = io.OpenDirAndFileDialog(global.GetSaveType()); err != nil {
 			return
 		}
 		fs.updateSlots()
 	}
 
-	if len(global.DirFiles) == 0 {
+	if len(fs.DirFiles) == 0 {
 		fs.updateSlots()
 	}
 
@@ -44,7 +46,7 @@ func (fs *FileSelector) DrawLoad(w *nucular.Window) (loaded bool, err error) {
 	if w.ButtonText("Change") {
 		if d, f, e1 := io.OpenDirAndFileDialog(global.GetSaveType()); e1 == nil {
 			dir = d
-			global.DirFiles = f
+			fs.DirFiles = f
 			fs.updateSlots()
 		}
 	}
@@ -123,7 +125,7 @@ func (fs *FileSelector) DrawSave(w *nucular.Window) (saved bool, err error) {
 	if w.ButtonText("Change") {
 		if d, f, e1 := io.OpenDirAndFileDialog(global.GetSaveType()); e1 == nil {
 			dir = d
-			global.DirFiles = f
+			fs.DirFiles = f
 		}
 	}
 	if w.ButtonText("Refresh") {
@@ -165,8 +167,8 @@ func (fs *FileSelector) updateSlots() {
 	for _, s := range prSlots {
 		s.File = nil
 	}
-	global.DirFiles, _ = ioutil.ReadDir(io.GetConfig().GetDir(global.GetSaveType()))
-	for _, f := range global.DirFiles {
+	fs.DirFiles, _ = ioutil.ReadDir(io.GetConfig().GetDir(global.GetSaveType()))
+	for _, f := range fs.DirFiles {
 		if s, ok := slotLookup[f.Name()]; ok {
 			s.File = f
 		}

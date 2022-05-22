@@ -26,16 +26,23 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 	if err = p.saveCharacters(); err != nil {
 		return
 	}
-	if err = p.saveInventory(); err != nil {
+	if err = p.saveInventory(NormalOwnedItemList, NormalOwnedItemSortIdList, models.GetInventory()); err != nil {
+		return
+	}
+	if err = p.saveInventory(importantOwnedItemList, "", models.GetImportantInventory()); err != nil {
 		return
 	}
 	if err = p.saveMiscStats(); err != nil {
 		return
 	}
-	if models.GetParty().Enabled {
-		if err = p.saveParty(); err != nil {
-			return
-		}
+	if err = p.saveParty(); err != nil {
+		return
+	}
+	if err = p.saveMapData(); err != nil {
+		return
+	}
+	if err = p.saveTransportation(); err != nil {
+		return
 	}
 
 	iSlice := make([]interface{}, 0, len(p.Characters))
@@ -312,6 +319,80 @@ func (p *PR) saveParty() (err error) {
 	return p.setTarget(p.UserData, CorpsList, sl)
 }
 
+func (p *PR) saveMapData() (err error) {
+	md := models.GetMapData()
+	if err = p.setValue(p.MapData, MapID, md.MapID); err != nil {
+		return
+	}
+	if err = p.setValue(p.MapData, PointIn, md.PointIn); err != nil {
+		return
+	}
+	if err = p.setValue(p.MapData, TransportationID, md.TransportationID); err != nil {
+		return
+	}
+	if err = p.setValue(p.MapData, CarryingHoverShip, md.CarryingHoverShip); err != nil {
+		return
+	}
+	if global.Six == global.GetSaveType() {
+		if err = p.setValue(p.MapData, PlayableCharacterCorpsId, md.PlayableCharacterCorpsID); err != nil {
+			return
+		}
+	}
+
+	pe := jo.NewOrderedMap()
+	pos := jo.NewOrderedMap()
+	pos.Set("x", md.Player.X)
+	pos.Set("y", md.Player.Y)
+	pos.Set("z", md.Player.Z)
+	pe.Set(PlayerPosition, pos)
+	pe.Set(PlayerDirection, md.PlayerDirection)
+	if err = p.marshalTo(p.MapData, PlayerEntity, pe); err != nil {
+		return
+	}
+
+	gps := jo.NewOrderedMap()
+	gps.Set(GpsDataMapID, md.Gps.MapID)
+	gps.Set(GpsDataAreaID, md.Gps.AreaID)
+	gps.Set(GpsDataID, md.Gps.GpsID)
+	gps.Set(GpsDataWidth, md.Gps.Width)
+	gps.Set(GpsDataHeight, md.Gps.Height)
+	if err = p.marshalTo(p.MapData, GpsData, gps); err != nil {
+		return
+	}
+	return
+}
+
+func (p *PR) saveTransportation() (err error) {
+	v := make([]interface{}, len(models.Transportations))
+	for i, t := range models.Transportations {
+		om := jo.NewOrderedMap()
+		pos := jo.NewOrderedMap()
+		pos.Set("x", t.Position.X)
+		pos.Set("y", t.Position.Y)
+		pos.Set("z", t.Position.Z)
+		om.Set(TransPosition, pos)
+		om.Set(TransDirection, t.Direction)
+		om.Set(TransID, t.ID)
+		mapID := t.MapID
+		if t.ForcedDisabled {
+			mapID = -1
+		}
+		om.Set(TransMapID, mapID)
+		om.Set(TransEnable, false)
+		ts := t.TimeStampTicks
+		if t.ForcedEnabled && ts == 0 {
+			ts = global.NowToTicks()
+		}
+		om.Set(TransTimeStampTicks, ts)
+		var b []byte
+		if b, err = om.MarshalJSON(); err != nil {
+			return
+		}
+		v[i] = string(b)
+	}
+	return p.setTarget(p.UserData, OwnedTransportationList, v)
+}
+
 func (p *PR) getPartyID() int {
 	i, err := p.getFromTarget(p.UserData, CorpsList)
 	if err != nil {
@@ -326,15 +407,14 @@ func (p *PR) getPartyID() int {
 	return m.ID
 }
 
-func (p *PR) saveInventory() (err error) {
+func (p *PR) saveInventory(baseKey string, sortKey string, inventory *models.Inventory) (err error) {
 	var (
-		rows             = models.GetInventory().GetRowsForPrSave()
+		rows             = inventory.GetRowsForPrSave()
 		sl               = make([]interface{}, 0, len(rows))
 		b                []byte
 		slTarget         = jo.NewOrderedMap()
 		found            = make(map[int]bool)
 		removeDuplicates = models.GetInventory().RemoveDuplicates
-		addedCountLookup = make(map[int]int)
 	)
 
 	for _, r := range rows {
@@ -354,25 +434,15 @@ func (p *PR) saveInventory() (err error) {
 		sl = append(sl, string(b))
 	}
 
-	for k, v := range addedCountLookup {
-		if b, err = json.Marshal(&models.Row{
-			ItemID: k,
-			Count:  v,
-		}); err != nil {
-			return
-		}
-		sl = append(sl, string(b))
-	}
-
 	slTarget.Set(targetKey, sl)
-	if err = p.marshalTo(p.UserData, NormalOwnedItemList, slTarget); err != nil {
+	if err = p.marshalTo(p.UserData, baseKey, slTarget); err != nil {
 		return
 	}
 
-	if models.GetInventory().ResetSortOrder {
+	if inventory.ResetSortOrder && sortKey != "" {
 		slTarget = jo.NewOrderedMap()
 		slTarget.Set(targetKey, make([]interface{}, 0))
-		if err = p.marshalTo(p.UserData, NormalOwnedItemSortIdList, slTarget); err != nil {
+		if err = p.marshalTo(p.UserData, sortKey, slTarget); err != nil {
 			return
 		}
 	}

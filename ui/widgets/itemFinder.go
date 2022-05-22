@@ -1,5 +1,7 @@
 package widgets
 
+import "math"
+
 /*
 var (
 	name       nucular.TextEditor
@@ -77,3 +79,9 @@ func DrawItemFinder(w *nucular.Window, x, y int) (count int) {
 	return
 }
 */
+
+func GetTime(input int) (hours int, minutes int) {
+	hours = int(input / 3600)
+	minutes = int(math.Floor(float64(input%(3600)) / 60))
+	return
+}

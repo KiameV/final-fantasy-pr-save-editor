@@ -4,8 +4,12 @@ import (
 	"github.com/aarzilli/nucular"
 	"pr_save_editor/ui"
 	"pr_save_editor/ui/character"
+	"pr_save_editor/ui/importantInventory"
 	"pr_save_editor/ui/inventory"
+	"pr_save_editor/ui/mapData"
 	"pr_save_editor/ui/misc"
+	"pr_save_editor/ui/party"
+	"pr_save_editor/ui/transportation"
 )
 
 type mainMenu struct {
@@ -16,9 +20,12 @@ func NewUI() ui.UI {
 	return &mainMenu{
 		uis: []ui.UI{
 			character.NewUI(),
+			party.NewUI(),
 			inventory.NewUI(),
+			importantInventory.NewUI(),
+			mapData.NewUI(),
+			transportation.NewUI(),
 			misc.NewUI(),
-			//party.NewUI(),
 		},
 	}
 }

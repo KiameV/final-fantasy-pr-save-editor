@@ -6,6 +6,7 @@ import (
 	"pr_save_editor/global"
 	"pr_save_editor/models"
 	"pr_save_editor/ui"
+	"pr_save_editor/ui/widgets"
 )
 
 type miscUI struct {
@@ -51,7 +52,7 @@ func (u *miscUI) Draw(w *nucular.Window) {
 
 	w.Row(24).Static(200)
 	w.Label("Played Time:", "LC")
-	hours, minutes := getTime(int(m.PlayTime))
+	hours, minutes := widgets.GetTime(int(m.PlayTime))
 	w.Row(24).Static(200, 200)
 	b1 := w.PropertyInt("Hours", 0, &hours, math.MaxInt, 1, 0)
 	b2 := w.PropertyInt("Minutes", 0, &minutes, 59, 1, 0)
@@ -70,10 +71,4 @@ func (u *miscUI) Name() string {
 
 func (u *miscUI) Behavior() ui.Behavior {
 	return ui.Show
-}
-
-func getTime(input int) (hours int, minutes int) {
-	hours = int(input / 3600)
-	minutes = int(math.Floor(float64(input%(3600)) / 60))
-	return
 }

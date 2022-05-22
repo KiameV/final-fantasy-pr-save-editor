@@ -3,17 +3,14 @@ package inventory
 import (
 	"encoding/json"
 	"github.com/aarzilli/nucular"
-	"github.com/aarzilli/nucular/rect"
 	"pr_save_editor/io"
 	"pr_save_editor/models"
 	"pr_save_editor/ui"
 )
 
 type inventoryUI struct {
-	ids       []*nucular.TextEditor
-	counts    []*nucular.TextEditor
-	countLast int
-	yLast     int
+	ids    []*nucular.TextEditor
+	counts []*nucular.TextEditor
 }
 
 func NewUI() ui.UI {
@@ -41,100 +38,56 @@ func (u *inventoryUI) Draw(w *nucular.Window) {
 	var (
 		y     int
 		count = 4
+		inv   = models.GetInventory()
 	)
 
 	// Top
-	w.Row(u.yLast).SpaceBegin(u.countLast)
-	w.LayoutSpacePush(rect.Rect{
-		X: 0,
-		Y: y,
-		W: 150,
-		H: 22,
-	})
-	w.CheckboxText("Reset Sort Order", &models.GetInventory().ResetSortOrder)
-
-	w.LayoutSpacePush(rect.Rect{
-		X: 160,
-		Y: y,
-		W: 150,
-		H: 22,
-	})
-	w.CheckboxText("Remove Duplicates", &models.GetInventory().RemoveDuplicates)
-
-	w.LayoutSpacePush(rect.Rect{
-		X: 320,
-		Y: y,
-		W: 100,
-		H: 22,
-	})
+	w.Row(24).Static(150, 10, 150, 10, 100, 10, 100)
+	w.CheckboxText("Reset Sort Order", &inv.ResetSortOrder)
+	w.Spacing(1)
+	w.CheckboxText("Remove Duplicates", &inv.RemoveDuplicates)
+	w.Spacing(1)
 	if w.ButtonText("Save") {
-		if result, err := json.Marshal(models.GetInventory().Rows); err != nil {
+		if result, err := json.Marshal(inv.Rows); err != nil {
 			ui.DrawError = err
 		} else if err = io.SaveInvFile(w, result); err != nil {
 			ui.DrawError = err
 		}
 	}
-
-	w.LayoutSpacePush(rect.Rect{
-		X: 430,
-		Y: y,
-		W: 100,
-		H: 22,
-	})
+	w.Spacing(1)
 	if w.ButtonText("Load") {
 		if data, err := io.OpenInvFileDialog(w); err != nil {
 			ui.DrawError = err
-		} else if err = json.Unmarshal(data, &models.GetInventory().Rows); err != nil {
+		} else if err = json.Unmarshal(data, &inv.Rows); err != nil {
 			ui.DrawError = err
 		}
-		models.GetInventory().ResetSortOrder = true
+		inv.ResetSortOrder = true
 	}
-	y += 24
+	// widgets.DrawItemFinder(w, 540, 24)
 
 	// Items
-	w.LayoutSpacePush(rect.Rect{
-		X: 0,
-		Y: y,
-		W: 75,
-		H: 22,
-	})
-	w.Label("Item ID", "LC")
+	w.Row(24).Static(100, 10, 100)
+	w.Label("Item ID", "CC")
+	w.Spacing(1)
+	w.Label("Count", "CC")
 
-	w.LayoutSpacePush(rect.Rect{
-		X: 85,
-		Y: y,
-		W: 75,
-		H: 22,
-	})
-	w.Label("Count", "LC")
-	y += 24
-
-	for _, r := range models.GetInventoryRows() {
-		if r.ItemID == 93 || r.ItemID == 198 || r.ItemID == 199 || r.ItemID == 200 {
-			continue
+	isFirstEmptyRow := true
+	for _, r := range inv.GetRows() {
+		if r.ItemID == 0 && r.Count == 0 {
+			if isFirstEmptyRow {
+				isFirstEmptyRow = false
+			} else {
+				continue
+			}
 		}
-		w.LayoutSpacePush(rect.Rect{
-			X: 0,
-			Y: y,
-			W: 75,
-			H: 24,
-		})
-		w.PropertyInt("", 0, &r.ItemID, 999, 1, 0)
 
-		w.LayoutSpacePush(rect.Rect{
-			X: 85,
-			Y: y,
-			W: 75,
-			H: 24,
-		})
+		w.Row(24).Static(100, 10, 100)
+		w.PropertyInt("", 0, &r.ItemID, 999, 1, 0)
+		w.Spacing(1)
 		w.PropertyInt("", 0, &r.Count, 999, 1, 0)
 		y += 24
 		count += 2
 	}
-	u.yLast = y
-
-	// Finder
-	u.countLast = count // + widgets.DrawItemFinder(w, 540, 24)
 }
 
 func (u *inventoryUI) Refresh() {

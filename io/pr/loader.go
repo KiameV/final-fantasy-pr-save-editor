@@ -23,6 +23,11 @@ func (p *PR) Load(fileName string) (err error) {
 		s     string
 		names []unicodeNameReplace
 	)
+	models.GetInventory().Clear()
+	models.GetParty().Clear()
+	models.Characters = make([]*models.Character, 0, len(p.Characters))
+	models.CharacterNames = make([]string, 0, len(p.Characters))
+
 	//p.names = make([][]rune, 0, 40)
 	if out, err = p.readFile(fileName); err != nil {
 		return
@@ -116,7 +121,16 @@ func (p *PR) Load(fileName string) (err error) {
 	if err = p.loadMiscStats(); err != nil {
 		return
 	}
-	if err = p.loadInventory(); err != nil {
+	if err = p.loadInventory(NormalOwnedItemList, models.GetInventory()); err != nil {
+		return
+	}
+	if err = p.loadInventory(importantOwnedItemList, models.GetImportantInventory()); err != nil {
+		return
+	}
+	if err = p.loadMapData(); err != nil {
+		return
+	}
+	if err = p.loadTransportation(); err != nil {
 		return
 	}
 
@@ -163,8 +177,6 @@ func (p *PR) loadParty() (err error) {
 }
 
 func (p *PR) loadCharacters() (err error) {
-	models.Characters = make([]*models.Character, 0, len(p.Characters))
-	models.CharacterNames = make([]string, 0, len(p.Characters))
 	party := models.GetParty()
 	party.Clear()
 	for _, d := range p.Characters {
@@ -359,23 +371,131 @@ func (p *PR) loadMiscStats() (err error) {
 	return
 }
 
-func (p *PR) loadInventory() (err error) {
+func (p *PR) loadInventory(key string, inventory *models.Inventory) (err error) {
 	var (
 		sl  interface{}
-		inv = models.GetInventory()
 		row models.Row
 	)
-	if sl, err = p.getFromTarget(p.UserData, NormalOwnedItemList); err != nil {
+	if sl, err = p.getFromTarget(p.UserData, key); err != nil {
 		return
 	}
-	inv.Reset()
+	inventory.Reset()
 	for i, r := range sl.([]interface{}) {
 		if err = json.Unmarshal([]byte(r.(string)), &row); err != nil {
 			return
 		}
-		inv.Set(i, row)
+		inventory.Set(i, row)
 	}
 	return nil
+}
+
+func (p *PR) loadMapData() (err error) {
+	md := models.GetMapData()
+	if md.MapID, err = p.getInt(p.MapData, MapID); err != nil {
+		return
+	}
+	if md.PointIn, err = p.getInt(p.MapData, PointIn); err != nil {
+		return
+	}
+	if md.TransportationID, err = p.getInt(p.MapData, TransportationID); err != nil {
+		return
+	}
+	if md.CarryingHoverShip, err = p.getBool(p.MapData, CarryingHoverShip); err != nil {
+		return
+	}
+	if md.PlayableCharacterCorpsID, err = p.getInt(p.MapData, PlayableCharacterCorpsId); err != nil {
+		return
+	}
+
+	pe := jo.NewOrderedMap()
+	if err = p.unmarshalFrom(p.MapData, PlayerEntity, pe); err != nil {
+		return
+	}
+	var pos *jo.OrderedMap
+	if pos = pe.Get(PlayerPosition).(*jo.OrderedMap); pos == nil {
+		err = errors.New("unable to get transportation position")
+		return
+	}
+	if md.Player.X, err = p.getFloat(pos, "x"); err != nil {
+		return
+	}
+	if md.Player.Y, err = p.getFloat(pos, "y"); err != nil {
+		return
+	}
+	if md.Player.Z, err = p.getFloat(pos, "z"); err != nil {
+		return
+	}
+	if md.PlayerDirection, err = p.getInt(pe, PlayerDirection); err != nil {
+		return
+	}
+
+	gps := jo.NewOrderedMap()
+	if err = p.unmarshalFrom(p.MapData, GpsData, gps); err != nil {
+		return
+	}
+	if md.Gps.MapID, err = p.getInt(gps, GpsDataMapID); err != nil {
+		return
+	}
+	if md.Gps.AreaID, err = p.getInt(gps, GpsDataAreaID); err != nil {
+		return
+	}
+	if md.Gps.GpsID, err = p.getInt(gps, GpsDataID); err != nil {
+		return
+	}
+	if md.Gps.Width, err = p.getInt(gps, GpsDataWidth); err != nil {
+		return
+	}
+	if md.Gps.Height, err = p.getInt(gps, GpsDataHeight); err != nil {
+		return
+	}
+	return
+}
+
+func (p *PR) loadTransportation() (err error) {
+	var sl interface{}
+	if sl, err = p.getFromTarget(p.UserData, OwnedTransportationList); err != nil {
+		return
+	}
+	models.Transportations = make([]*models.Transportation, len(sl.([]interface{})))
+	for index, i := range sl.([]interface{}) {
+		om := jo.NewOrderedMap()
+		if err = om.UnmarshalJSON([]byte(i.(string))); err != nil {
+			return
+		}
+		t := &models.Transportation{}
+		if t.ID, err = p.getInt(om, TransID); err != nil {
+			return
+		}
+		if t.MapID, err = p.getInt(om, TransMapID); err != nil {
+			return
+		}
+		if t.Direction, err = p.getInt(om, TransDirection); err != nil {
+			return
+		}
+		if t.TimeStampTicks, err = p.getUint(om, TransTimeStampTicks); err != nil {
+			return
+		}
+
+		var pos *jo.OrderedMap
+		if pos = om.Get(TransPosition).(*jo.OrderedMap); pos == nil {
+			err = errors.New("unable to get transportation position")
+			return
+		}
+		if t.Position.X, err = p.getFloat(pos, "x"); err != nil {
+			return
+		}
+		if t.Position.Y, err = p.getFloat(pos, "y"); err != nil {
+			return
+		}
+		if t.Position.Z, err = p.getFloat(pos, "z"); err != nil {
+			return
+		}
+
+		t.Enabled = t.TimeStampTicks > 0 && t.MapID > 0 && t.Position.X > 0 && t.Position.Y > 0 && t.Position.Z > 0
+
+		models.Transportations[index] = t
+	}
+	return
 }
 
 func (p *PR) getString(c *jo.OrderedMap, key string) (s string, err error) {
@@ -419,6 +539,32 @@ func (p *PR) getInt(c *jo.OrderedMap, key string) (i int, err error) {
 		l, err = strconv.ParseInt(k.String(), 10, 32)
 		if err == nil {
 			i = int(l)
+		}
+	default:
+		err = fmt.Errorf("unable to parse field %s value %v ", key, j)
+	}
+	return
+}
+
+func (p *PR) getUint(c *jo.OrderedMap, key string) (i uint64, err error) {
+	j, ok := c.GetValue(key)
+	if !ok {
+		err = fmt.Errorf("unable to find %s", key)
+	}
+
+	k := reflect.ValueOf(j)
+	switch k.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return uint64(k.Int()), nil
+	case reflect.Float32, reflect.Float64:
+		return uint64(k.Float()), nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return uint64(k.Uint()), nil
+	case reflect.String:
+		var l int64
+		l, err = strconv.ParseInt(k.String(), 10, 64)
+		if err == nil {
+			i = uint64(l)
 		}
 	default:
 		err = fmt.Errorf("unable to parse field %s value %v ", key, j)
@@ -501,7 +647,13 @@ func (p *PR) unmarshalFrom(from *jo.OrderedMap, key string, m *jo.OrderedMap) (e
 	if !ok {
 		err = fmt.Errorf("unable to find %s", key)
 	}
-	return m.UnmarshalJSON([]byte(i.(string)))
+	switch t := i.(type) {
+	case string:
+		err = m.UnmarshalJSON([]byte(t))
+	default:
+		err = fmt.Errorf("cannot unmarshal unkown type %v", i)
+	}
+	return
 }
 
 func (p *PR) unmarshal(i interface{}, m *map[string]interface{}) error {

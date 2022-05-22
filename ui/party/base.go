@@ -16,16 +16,14 @@ func NewUI() ui.UI {
 }
 
 func (u *partyUI) Draw(w *nucular.Window) {
-	p := models.GetParty()
-	w.Row(24).Static(260)
-	w.CheckboxText("Enable", &p.Enabled)
 	w.Row(10).Static()
 	for i := 0; i < 4; i++ {
-		u.drawRow(w, i, p, &u.selected[i])
+		u.drawRow(w, i, &u.selected[i])
 	}
 }
 
-func (u *partyUI) drawRow(w *nucular.Window, slot int, p *models.Party, selected *int) {
+func (u *partyUI) drawRow(w *nucular.Window, slot int, selected *int) {
+	p := models.GetParty()
 	w.Row(24).Static(60, 200, 200, 60)
 	w.Label(fmt.Sprintf("Member: %d", slot+1), "LC")
 	if i := w.ComboSimple(p.PossibleNames, *selected, 12); i != *selected {

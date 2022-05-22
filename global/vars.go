@@ -1,8 +1,8 @@
 package global
 
 import (
-	"io/fs"
 	"os"
+	"time"
 )
 
 const (
@@ -12,7 +12,6 @@ const (
 
 var (
 	PWD      string
-	DirFiles []fs.FileInfo
 	FileName string
 	showing  CurrentScreen
 	prevShow CurrentScreen
@@ -73,4 +72,8 @@ func init() {
 	if PWD, err = os.Getwd(); err != nil {
 		PWD = "."
 	}
+}
+
+func NowToTicks() uint64 {
+	return uint64(float64(time.Now().UnixNano())*0.01) + uint64(60*60*24*365*1970*10000000)
 }

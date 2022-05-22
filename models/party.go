@@ -23,15 +23,13 @@ type Party struct {
 	Possible      map[string]*Member
 	PossibleNames []string
 	//PossibleNamesWithNPCs []string
-	Enabled bool
+	//Enabled bool
 	//IncludeNPCs bool
 }
 
 func GetParty() *Party {
 	if party == nil {
-		party = &Party{
-			Enabled: false,
-		}
+		party = &Party{}
 		party.Clear()
 	}
 	return party
@@ -61,7 +59,9 @@ func (p *Party) AddPossibleMember(m *Member) {
 func (p *Party) SetMemberByID(slot int, characterID int) error {
 	for _, m := range p.Possible {
 		if characterID == m.CharacterID {
-			p.Members[slot] = m
+			if slot < len(p.Members) {
+				p.Members[slot] = m
+			}
 			return nil
 		}
 	}
