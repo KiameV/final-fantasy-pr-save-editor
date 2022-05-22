@@ -1,0 +1,14 @@
+*/bin
+*/obj
+*.vs
+.idea
+*.ff6inv
+venv
+temp
+save.json
+saved.json
+loaded.json
+ff6editor.config
+ffvi_editor.exe
+prSaveEditor.config
+prSaveEditor.exe
