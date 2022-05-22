@@ -3,6 +3,7 @@ package misc
 import (
 	"github.com/aarzilli/nucular"
 	"math"
+	"pr_save_editor/global"
 	"pr_save_editor/models"
 	"pr_save_editor/ui"
 )
@@ -23,7 +24,11 @@ func (u *miscUI) Draw(w *nucular.Window) {
 	w.Spacing(1)
 	w.PropertyInt("Steps:", 0, &m.Steps, 16777216, 1000, 0)
 	w.Spacing(1)
-	w.PropertyInt("Cursed Shield Fight Count:", 0, &m.CursedShieldFightCount, 255, 1, 0)
+	if global.Six == global.GetSaveType() {
+		w.PropertyInt("Cursed Shield Fight Count:", 0, &m.CursedShieldFightCount, 255, 1, 0)
+	} else {
+		w.Spacing(1)
+	}
 
 	w.Row(5).Static(0)
 

@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const version = "1.8.2"
+const version = "0.1.0"
 
 var (
 	mainMenu      ui.UI
@@ -39,15 +39,15 @@ func main() {
 		x = global.WindowWidth
 		y = global.WindowHeight
 	}
-	wnd := nucular.NewMasterWindowSize(0, "Final Fantasy VI Editor - "+version, image.Point{X: x, Y: y}, updateWindow)
+	wnd := nucular.NewMasterWindowSize(0, "Final Fantasy PR Save Editor - "+version, image.Point{X: x, Y: y}, updateWindow)
 	wnd.SetStyle(style.FromTable(customTheme, 1.2))
 	wnd.Main()
 }
 
 func updateWindow(w *nucular.Window) {
 	w.MenubarBegin()
-	w.Row(12).Static(100, 100, 300, 100, 100)
-	if w := w.Menu(label.TA("Load PR Save", "LC"), 100, nil); w != nil {
+	w.Row(12).Static(100, 100, 300, 200)
+	if w := w.Menu(label.TA("Load", "LC"), 100, nil); w != nil {
 		ui.DrawError = nil
 		w.Row(12).Dynamic(1)
 		if w.MenuItem(label.TA("I", "LC")) {
@@ -106,7 +106,6 @@ func updateWindow(w *nucular.Window) {
 	}
 
 	if status != "" {
-		w.Spacing(1)
 		w.Label("Status: "+status, "RC")
 		if statusTimer != nil {
 			statusTimer.Stop()
