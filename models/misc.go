@@ -16,6 +16,7 @@ type Misc struct {
 	OpenedChestCount       int
 	IsCompleteFlag         bool
 	PlayTime               float64
+	OwnedCrystals          [4]bool
 }
 
 var misc *Misc

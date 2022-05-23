@@ -35,11 +35,7 @@ func NewUI() ui.UI {
 }
 
 func (u *inventoryUI) Draw(w *nucular.Window) {
-	var (
-		y     int
-		count = 4
-		inv   = models.GetInventory()
-	)
+	inv := models.GetInventory()
 
 	// Top
 	w.Row(24).Static(150, 10, 150, 10, 100, 10, 100)
@@ -85,8 +81,6 @@ func (u *inventoryUI) Draw(w *nucular.Window) {
 		w.PropertyInt("", 0, &r.ItemID, 999, 1, 0)
 		w.Spacing(1)
 		w.PropertyInt("", 0, &r.Count, 999, 1, 0)
-		y += 24
-		count += 2
 	}
 }
 

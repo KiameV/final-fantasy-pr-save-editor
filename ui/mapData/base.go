@@ -8,9 +8,7 @@ import (
 	"pr_save_editor/ui"
 )
 
-type mapDataUI struct {
-	yLast int
-}
+type mapDataUI struct{}
 
 func NewUI() ui.UI {
 	return &mapDataUI{}

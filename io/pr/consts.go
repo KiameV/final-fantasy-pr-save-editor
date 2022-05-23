@@ -38,7 +38,7 @@ const (
 	CurrentArea               = "currentArea"
 	CurrentLocation           = "currentLocation"
 	OwnedTransportationList   = "ownedTransportationList"
-	OwendCrystalFlags         = "owendCrystalFlags"
+	OwnendCrystalFlags        = "owendCrystalFlags"
 	WarehouseItemList         = "warehouseItemList"
 	OwnedKeyWaordList         = "ownedKeyWaordList"
 	OwnedMagicList            = "ownedMagicList"

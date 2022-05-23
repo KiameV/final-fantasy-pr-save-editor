@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"pr_save_editor/global"
 	"pr_save_editor/models"
 	"reflect"
 	"sort"
@@ -368,6 +369,17 @@ func (p *PR) loadMiscStats() (err error) {
 	if m.PlayTime, err = p.getFloat(p.UserData, PlayTime); err != nil {
 		return
 	}
+
+	if global.GetSaveType() == global.One {
+		var sl interface{}
+		if sl, err = p.getFromTarget(p.UserData, OwnendCrystalFlags); err != nil {
+			return
+		}
+		for i, j := range sl.([]interface{}) {
+			m.OwnedCrystals[i] = j.(bool)
+		}
+	}
+
 	return
 }
 

@@ -9,15 +9,13 @@ import (
 	"pr_save_editor/ui"
 )
 
-type mapDataUI struct {
-	yLast int
-}
+type transportationUI struct{}
 
 func NewUI() ui.UI {
-	return &mapDataUI{}
+	return &transportationUI{}
 }
 
-func (u *mapDataUI) Draw(w *nucular.Window) {
+func (u *transportationUI) Draw(w *nucular.Window) {
 	for i, t := range models.Transportations {
 		if i > 0 {
 			w.Row(4).Static()
@@ -63,14 +61,14 @@ func (u *mapDataUI) Draw(w *nucular.Window) {
 	}
 }
 
-func (u *mapDataUI) Refresh() {
+func (u *transportationUI) Refresh() {
 
 }
 
-func (u *mapDataUI) Name() string {
+func (u *transportationUI) Name() string {
 	return "Transportation"
 }
 
-func (u *mapDataUI) Behavior() ui.Behavior {
+func (u *transportationUI) Behavior() ui.Behavior {
 	return ui.Show
 }

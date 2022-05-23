@@ -488,6 +488,15 @@ func (p *PR) saveMiscStats() (err error) {
 	if err = p.setFlag(p.Base, IsCompleteFlag, misc.IsCompleteFlag); err != nil {
 		return
 	}
+	if global.GetSaveType() == global.One {
+		sl := make([]interface{}, len(misc.OwnedCrystals))
+		for i, b := range misc.OwnedCrystals {
+			sl[i] = b
+		}
+		if err = p.setTarget(p.UserData, OwnendCrystalFlags, sl); err != nil {
+			return
+		}
+	}
 	return p.setValue(p.UserData, PlayTime, misc.PlayTime)
 }
 

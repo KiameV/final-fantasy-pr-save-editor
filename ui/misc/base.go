@@ -48,6 +48,21 @@ func (u *miscUI) Draw(w *nucular.Window) {
 	w.Row(24).Static(250, 400)
 	_ = w.PropertyInt("Chests Opened", 0, &m.OpenedChestCount, 214, 1, 0)
 
+	if global.GetSaveType() == global.One {
+		w.Row(5).Static()
+		w.Row(24).Static(500)
+		w.Label("Need help figuring out which is Fire, Ice, Wind, and Earth", "LC")
+
+		w.Row(24).Static(100)
+		w.CheckboxText("Crystal 1", &m.OwnedCrystals[0])
+		w.Row(24).Static(100)
+		w.CheckboxText("Crystal 2", &m.OwnedCrystals[1])
+		w.Row(24).Static(100)
+		w.CheckboxText("Crystal 3", &m.OwnedCrystals[2])
+		w.Row(24).Static(100)
+		w.CheckboxText("Crystal 4", &m.OwnedCrystals[3])
+	}
+
 	w.Row(5).Static()
 
 	w.Row(24).Static(200)
