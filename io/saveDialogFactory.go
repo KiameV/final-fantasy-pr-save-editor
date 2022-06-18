@@ -1,8 +1,10 @@
 package io
 
 import (
+	"fmt"
 	"github.com/aarzilli/nucular"
 	"io/ioutil"
+	"pr_save_editor/global"
 	"strings"
 )
 
@@ -11,8 +13,9 @@ func SaveInvFile(w *nucular.Window, text []byte) error {
 	if err != nil {
 		return err
 	}
-	if !strings.Contains(fn, ".ff6inv") {
-		fn += ".ff6inv"
+	ext := fmt.Sprintf(".ff%dinv", global.GetSaveType())
+	if !strings.Contains(fn, ext) {
+		fn += ext
 	}
 	return ioutil.WriteFile(fn, text, 0644)
 }

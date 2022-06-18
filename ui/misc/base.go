@@ -21,9 +21,9 @@ func (u *miscUI) Draw(w *nucular.Window) {
 	m := models.GetMisc()
 
 	w.Row(24).Static(200, 10, 200, 10, 250)
-	w.PropertyInt("GP:", 0, &m.GP, 16777216, 1000, 0)
+	w.PropertyInt("GP:", 0, &m.GP, math.MaxInt32, 1000, 0)
 	w.Spacing(1)
-	w.PropertyInt("Steps:", 0, &m.Steps, 16777216, 1000, 0)
+	w.PropertyInt("Steps:", 0, &m.Steps, math.MaxInt32, 1000, 0)
 	w.Spacing(1)
 	if global.Six == global.GetSaveType() {
 		w.PropertyInt("Cursed Shield Fight Count:", 0, &m.CursedShieldFightCount, 255, 1, 0)
@@ -34,11 +34,11 @@ func (u *miscUI) Draw(w *nucular.Window) {
 	w.Row(5).Static(0)
 
 	w.Row(24).Static(200, 10, 200, 10, 250)
-	w.PropertyInt("Save Count:", 0, &m.NumberOfSaves, 16777216, 1, 0)
+	w.PropertyInt("Save Count:", 0, &m.NumberOfSaves, math.MaxInt32, 1, 0)
 	w.Spacing(1)
-	w.PropertyInt("Battle Count:", 0, &m.BattleCount, 16777216, 1, 0)
+	w.PropertyInt("Battle Count:", 0, &m.BattleCount, math.MaxInt32, 1, 0)
 	w.Spacing(1)
-	w.PropertyInt("Escape Count:", 0, &m.EscapeCount, 16777216, 1, 0)
+	w.PropertyInt("Escape Count:", 0, &m.EscapeCount, math.MaxInt32, 1, 0)
 
 	w.Row(5).Static(0)
 
@@ -46,7 +46,7 @@ func (u *miscUI) Draw(w *nucular.Window) {
 	w.CheckboxText("Is Complete Flag", &m.IsCompleteFlag)
 
 	w.Row(24).Static(250, 400)
-	_ = w.PropertyInt("Chests Opened", 0, &m.OpenedChestCount, 214, 1, 0)
+	_ = w.PropertyInt("Chests Opened", 0, &m.OpenedChestCount, 218, 1, 0)
 
 	if global.GetSaveType() == global.One {
 		w.Row(5).Static()

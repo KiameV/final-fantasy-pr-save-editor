@@ -1,11 +1,13 @@
 package widgets
 
-import "math"
+import (
+	"github.com/aarzilli/nucular"
+	"math"
+	"pr_save_editor/consts"
+)
 
-/*
 var (
 	name       nucular.TextEditor
-	prevName   string
 	nameResult []string
 )
 
@@ -15,70 +17,27 @@ func init() {
 	name.SingleLine = true
 }
 
-func DrawItemFinder(w *nucular.Window, x, y int) (count int) {
-	count = 6
-
-	w.LayoutSpacePush(rect.Rect{
-		X: x,
-		Y: y,
-		W: 120,
-		H: 18,
-	})
-	w.Label("Find By Name:", "LC")
-	y += 24
-
-	w.LayoutSpacePush(rect.Rect{
-		X: x,
-		Y: y,
-		W: 80,
-		H: 22,
-	})
-	if e := name.Edit(w); e == nucular.EditActive || e == nucular.EditCommitted {
-		l := len(name.Buffer)
-		if l == 0 || l >= 2 {
-			nameResult = nameResult[:0]
-		}
-		if l >= 2 {
-			s := strings.ToLower(string(name.Buffer))
-			if global.IsShowingPR() {
-				for n, v := range pr.ItemsByName {
-					if strings.Index(strings.ToLower(n), s) != -1 {
-						nameResult = append(nameResult, fmt.Sprintf("%d - %s", v, n))
-						count++
-					}
-				}
-			} else {
-				for n, v := range snes.ItemsByName {
-					if strings.Index(strings.ToLower(n), s) != -1 {
-						nameResult = append(nameResult, fmt.Sprintf("%s - %s", v, n))
-						count++
-					}
-				}
+func AddItemFinder(w *nucular.Window, itemSet ...[]*consts.Item) {
+	if sw := w.GroupBegin("Item Finder", 0); sw != nil {
+		sw.Row(24).Static(100, 80)
+		sw.Label("Find By Name:", "LC")
+		if e := name.Edit(sw); e == nucular.EditActive || e == nucular.EditCommitted {
+			l := len(name.Buffer)
+			if l == 0 || l >= 2 {
+				nameResult = nameResult[:0]
 			}
-			sort.Strings(nameResult)
+			if l >= 2 {
+				nameResult = consts.Search(string(name.Buffer), itemSet...)
+			}
 		}
-	}
-	w.LayoutSpacePush(rect.Rect{
-		X: x + 90,
-		Y: y,
-		W: 40,
-		H: 22,
-	})
-	y += 24
 
-	for _, s := range nameResult {
-		w.LayoutSpacePush(rect.Rect{
-			X: x + 5,
-			Y: y,
-			W: 150,
-			H: 22,
-		})
-		w.Label(s, "LC")
-		y += 24
+		for _, s := range nameResult {
+			sw.Row(20).Static(150)
+			sw.Label(s, "LC")
+		}
+		sw.GroupEnd()
 	}
-	return
 }
-*/
 
 func GetTime(input int) (hours int, minutes int) {
 	hours = int(input / 3600)
