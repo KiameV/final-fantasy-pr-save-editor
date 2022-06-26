@@ -46,7 +46,7 @@ func (u *miscUI) Draw(w *nucular.Window) {
 	w.CheckboxText("Is Complete Flag", &m.IsCompleteFlag)
 
 	w.Row(24).Static(250, 400)
-	_ = w.PropertyInt("Chests Opened", 0, &m.OpenedChestCount, 218, 1, 0)
+	_ = w.PropertyInt("Chests Opened", 0, &m.OpenedChestCount, 255, 1, 0)
 
 	if global.GetSaveType() == global.One {
 		w.Row(5).Static()
