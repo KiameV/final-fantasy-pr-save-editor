@@ -18,7 +18,8 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 	var (
 		toFile = filepath.Join(io.GetConfig().GetDir(global.GetSaveType()), fileName)
 		temp   = filepath.Join(global.PWD, "temp")
-		cmd    = exec.Command("python", "./io/python/io.py", "obfuscateFile", toFile, temp)
+		path   = strings.ReplaceAll(filepath.Join(global.PWD, "pr_io", "pr_io.exe"), "\\", "/")
+		cmd    = exec.Command("cmd", "/C", path, "obfuscateFile", toFile, temp)
 		//needed   = make(map[int]int)
 		slTarget = jo.NewOrderedMap()
 	)

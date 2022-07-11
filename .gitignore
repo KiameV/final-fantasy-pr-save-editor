@@ -3,6 +3,7 @@
 *.vs
 .idea
 *.ff6inv
+pr_io*
 venv
 temp
 save.json

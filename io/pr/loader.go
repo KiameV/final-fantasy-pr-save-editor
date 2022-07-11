@@ -1,14 +1,18 @@
 package pr
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	jo "gitlab.com/c0b/go-ordered-json"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"pr_save_editor/global"
 	"pr_save_editor/models"
 	"reflect"
@@ -780,12 +784,23 @@ type idCount struct {
 	Count     int `json:"count"`
 }
 
-func (p *PR) execPythonLoad(fileName string, omitFirstBytes bool) ([]byte, error) {
+func (p *PR) execLoad(fileName string, omitFirstBytes bool) ([]byte, error) {
+	if _, err := os.Stat("pr_io"); err != nil {
+		if err = p.downloadPyExe(); err != nil {
+			return nil, err
+		}
+	}
+	if _, err := os.Stat("pr_io.zip"); err != nil {
+		_ = os.Remove("pr_io.zip")
+	}
+
 	s := "0"
 	if omitFirstBytes {
 		s = "1"
 	}
-	cmd := exec.Command("python", "./io/python/io.py", "deobfuscateFile", fileName, s)
+
+	path := strings.ReplaceAll(filepath.Join(global.PWD, "pr_io", "pr_io.exe"), "\\", "/")
+	cmd := exec.Command("cmd", "/C", path, "deobfuscateFile", fileName, s)
 	return cmd.Output()
 }
 
@@ -840,18 +855,9 @@ func (p *PR) getSaveData(s string) (string, error) {
 }
 
 func (p *PR) readFile(fileName string) (out []byte, err error) {
-	if out, err = p.execPythonLoad(fileName, true); err == nil {
-		return
-	}
-	if out, err = p.execPythonLoad(fileName, false); err == nil {
-		return
-	}
-	if err = p.initialSetupCmd(); err != nil {
-		return
-	}
-	if out, err = p.execPythonLoad(fileName, true); err != nil {
+	if out, err = p.execLoad(fileName, true); err != nil {
 		e1 := handleCmdError(err)
-		if out, err = p.execPythonLoad(fileName, false); err != nil {
+		if out, err = p.execLoad(fileName, false); err != nil {
 			err = e1
 			return
 		}
@@ -930,6 +936,84 @@ func (p *PR) replaceUnicodeNames(b []byte, names *[]unicodeNameReplace) ([]byte,
 type unicodeNameReplace struct {
 	Original string
 	Replaced string
+}
+
+func (p *PR) downloadPyExe() error {
+	var (
+		resp, err = http.Get("https://github.com/KiameV/pr_save_io/releases/download/latest/pr_io.zip")
+		out       *os.File
+		r         *zip.ReadCloser
+	)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	fmt.Println("status", resp.Status)
+	if resp.StatusCode != 200 {
+		return errors.New("failed to download the save file reader")
+	}
+
+	// Create the file
+	if out, err = os.Create("pr_io.zip"); err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	if _, err = io.Copy(out, resp.Body); err != nil {
+		return err
+	}
+
+	if r, err = zip.OpenReader("pr_io.zip"); err != nil {
+		return err
+	}
+	defer func() { _ = r.Close() }()
+
+	if err = os.Mkdir("./pr_io", 0755); err != nil {
+		return err
+	}
+
+	// Closure to address file descriptors issue with all the deferred .Close() methods
+	for _, f := range r.File {
+		if err = extractArchiveFile(".", f); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func extractArchiveFile(dest string, f *zip.File) (err error) {
+	var (
+		rc   io.ReadCloser
+		file *os.File
+		path string
+	)
+	if rc, err = f.Open(); err != nil {
+		return
+	}
+	defer func() { _ = rc.Close() }()
+
+	path = filepath.Join(dest, f.Name)
+	// Check for ZipSlip (Directory traversal)
+	path = strings.ReplaceAll(path, "..", "")
+
+	if f.FileInfo().IsDir() {
+		if err = os.MkdirAll(path, f.Mode()); err != nil {
+			return
+		}
+	} else {
+		if err = os.MkdirAll(filepath.Dir(path), f.Mode()); err != nil {
+			return
+		}
+		if file, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode()); err != nil {
+			return
+		}
+		defer func() { _ = file.Close() }()
+		if _, err = io.Copy(file, rc); err != nil {
+			return
+		}
+	}
+	return
 }
 
 /*
