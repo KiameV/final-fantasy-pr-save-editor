@@ -800,33 +800,18 @@ func (p *PR) execLoad(fileName string, omitFirstBytes bool) ([]byte, error) {
 	}
 
 	path := strings.ReplaceAll(filepath.Join(global.PWD, "pr_io", "pr_io.exe"), "\\", "/")
+	if strings.Contains(path, " ") {
+		return nil, errors.New("PR Save Editor's path cannot have spaces. Sorry!")
+	}
 	cmd := exec.Command("cmd", "/C", path, "deobfuscateFile", fileName, s)
 	return cmd.Output()
 }
 
-func (p *PR) initialSetupCmd() error {
-	cmd := exec.Command("python", "-m", "pip", "install", "--upgrade", "pip")
-	if _, err := cmd.Output(); err != nil {
-		return err
-	}
-
-	cmd = exec.Command("pip", "install", "py3rijndael")
-	if _, err := cmd.Output(); err != nil {
-		return err
-	}
-
-	cmd = exec.Command("pip", "install", "pycryptodome")
-	if _, err := cmd.Output(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func handleCmdError(err error) error {
+func handleCmdError(out []byte, err error) error {
 	if e, ok := err.(*exec.ExitError); ok {
-		return fmt.Errorf("Python failed to load file: " + string(e.Stderr))
+		return fmt.Errorf("failed to load file: " + string(e.Stderr))
 	}
-	return fmt.Errorf("Python failed to load file: " + err.Error())
+	return fmt.Errorf("failed to load file:\n%s\n%s", err.Error(), string(out))
 }
 
 func (p *PR) loadBase(s string) (err error) {
@@ -856,7 +841,7 @@ func (p *PR) getSaveData(s string) (string, error) {
 
 func (p *PR) readFile(fileName string) (out []byte, err error) {
 	if out, err = p.execLoad(fileName, true); err != nil {
-		e1 := handleCmdError(err)
+		e1 := handleCmdError(out, err)
 		if out, err = p.execLoad(fileName, false); err != nil {
 			err = e1
 			return
