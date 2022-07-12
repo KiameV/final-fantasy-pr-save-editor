@@ -799,11 +799,9 @@ func (p *PR) execLoad(fileName string, omitFirstBytes bool) ([]byte, error) {
 		s = "1"
 	}
 
-	path := strings.ReplaceAll(filepath.Join(global.PWD, "pr_io", "pr_io.exe"), "\\", "/")
-	if strings.Contains(path, " ") {
-		return nil, errors.New("PR Save Editor's path cannot have spaces. Sorry!")
-	}
-	cmd := exec.Command("cmd", "/C", path, "deobfuscateFile", fileName, s)
+	path := strings.ReplaceAll(filepath.Join(global.PWD, "pr_io"), "\\", "/")
+	cmd := exec.Command("cmd", "/C", "pr_io.exe", "deobfuscateFile", fileName, s)
+	cmd.Dir = path
 	return cmd.Output()
 }
 

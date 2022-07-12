@@ -18,11 +18,11 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 	var (
 		toFile = filepath.Join(io.GetConfig().GetDir(global.GetSaveType()), fileName)
 		temp   = filepath.Join(global.PWD, "temp")
-		path   = strings.ReplaceAll(filepath.Join(global.PWD, "pr_io", "pr_io.exe"), "\\", "/")
-		cmd    = exec.Command("cmd", "/C", path, "obfuscateFile", toFile, temp)
+		cmd    = exec.Command("cmd", "/C", "pr_io.exe", "obfuscateFile", toFile, temp)
 		//needed   = make(map[int]int)
 		slTarget = jo.NewOrderedMap()
 	)
+	cmd.Dir = strings.ReplaceAll(filepath.Join(global.PWD, "pr_io"), "\\", "/")
 
 	if err = p.saveCharacters(); err != nil {
 		return
