@@ -2,22 +2,28 @@ package io
 
 import (
 	"fmt"
-	"github.com/sqweek/dialog"
+	"github.com/ncruces/zenity"
 	"pr_save_editor/global"
 )
 
-func createInvDialog() *dialog.FileBuilder {
-	d := dialog.File()
-	d = d.SetStartDir(".")
-	d = d.Title("Select the Inventory Save File").Filter(getName(), getExt())
-	return d
+func openInvDialog() (string, error) {
+	return zenity.SelectFile(
+		zenity.Title("Select the Inventory Save File"),
+		zenity.Filename("."),
+		zenity.FileFilter{
+			Name:     getName(),
+			Patterns: []string{getExt()},
+		})
 }
 
-func createDialogInv() *dialog.FileBuilder {
-	d := dialog.File()
-	d = d.SetStartDir(".")
-	d = d.Title("Select the Inventory Save File").Filter(getName(), getExt())
-	return d
+func saveDialogInv() (string, error) {
+	return zenity.SelectFileSave(
+		zenity.Title("Select the Inventory Save File"),
+		zenity.Filename("."),
+		zenity.FileFilter{
+			Name:     getName(),
+			Patterns: []string{getExt()},
+		})
 }
 
 func getName() string {
@@ -25,5 +31,5 @@ func getName() string {
 }
 
 func getExt() string {
-	return fmt.Sprintf("ff%dinv", global.GetSaveType())
+	return fmt.Sprintf("*.ff%dinv", global.GetSaveType())
 }

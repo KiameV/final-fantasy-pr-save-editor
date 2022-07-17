@@ -1,19 +1,17 @@
 package io
 
 import (
-	"fmt"
 	"github.com/aarzilli/nucular"
 	"io/ioutil"
-	"pr_save_editor/global"
 	"strings"
 )
 
 func SaveInvFile(w *nucular.Window, text []byte) error {
-	fn, err := createDialogInv().Save()
+	fn, err := saveDialogInv()
 	if err != nil {
 		return err
 	}
-	ext := fmt.Sprintf(".ff%dinv", global.GetSaveType())
+	ext := getExt()
 	if !strings.Contains(fn, ext) {
 		fn += ext
 	}

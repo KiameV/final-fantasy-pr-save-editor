@@ -2,18 +2,18 @@ package io
 
 import (
 	"github.com/aarzilli/nucular"
-	"github.com/sqweek/dialog"
+	"github.com/ncruces/zenity"
 	"io/fs"
 	"io/ioutil"
 	"pr_save_editor/global"
 )
 
 func OpenDirAndFileDialog(saveType global.SaveType) (dir string, files []fs.FileInfo, err error) {
-	d := dialog.Directory()
-	d = d.Title("Select Save Directory")
-	d = d.SetStartDir(GetConfig().GetDir(saveType))
-
-	if dir, err = d.Browse(); err == nil {
+	dir, err = zenity.SelectFile(
+		zenity.Title("Select Save Directory"),
+		zenity.Directory(),
+		zenity.Filename(GetConfig().GetDir(saveType)))
+	if err == nil {
 		GetConfig().SetDir(dir, saveType)
 		SaveConfig()
 		files, err = ioutil.ReadDir(dir)
@@ -23,7 +23,7 @@ func OpenDirAndFileDialog(saveType global.SaveType) (dir string, files []fs.File
 
 func OpenInvFileDialog(w *nucular.Window) (data []byte, err error) {
 	var fn string
-	if fn, err = createInvDialog().Load(); err != nil {
+	if fn, err = openInvDialog(); err != nil {
 		return
 	}
 	return ioutil.ReadFile(fn)
