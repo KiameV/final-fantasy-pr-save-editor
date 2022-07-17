@@ -37,7 +37,7 @@ func (p *PR) Load(fileName string) (err error) {
 	if out, err = p.readFile(fileName); err != nil {
 		return
 	}
-	//ioutil.WriteFile("loaded.json", out, 0644)
+	//ioutil.WriteFile("loaded.json", out, 0755)
 	/*for i := 0; i < len(out); i++ {
 		if out[i] == '\\' && out[i+1] == 'x' {
 			j := string(out[i-20 : i+40])
@@ -49,7 +49,7 @@ func (p *PR) Load(fileName string) (err error) {
 		return
 	}
 	//if err == nil {
-	//err = ioutil.WriteFile("loaded_pre.json", out, 0644)
+	//err = ioutil.WriteFile("loaded_pre.json", out, 0755)
 	//}
 	/*if strings.Contains(s, "\\x") {
 		// For foreign langauge, need to double-escape the x
@@ -81,7 +81,7 @@ func (p *PR) Load(fileName string) (err error) {
 		var prettyJSON bytes.Buffer
 		err = json.Indent(&prettyJSON, []byte(t), "", "\t")
 		if err == nil {
-			err = ioutil.WriteFile("loaded.json", prettyJSON.Bytes(), 0644)
+			err = ioutil.WriteFile("loaded.json", prettyJSON.Bytes(), 0755)
 		}
 	}
 

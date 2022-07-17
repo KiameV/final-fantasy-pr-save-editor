@@ -15,5 +15,5 @@ func SaveInvFile(w *nucular.Window, text []byte) error {
 	if !strings.Contains(fn, ext) {
 		fn += ext
 	}
-	return ioutil.WriteFile(fn, text, 0644)
+	return ioutil.WriteFile(fn, text, 0755)
 }

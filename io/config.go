@@ -42,7 +42,7 @@ func SaveConfig() {
 		}
 		b, err := json.Marshal(&config)
 		if err == nil {
-			os.WriteFile(filepath.Join(global.PWD, file), b, 644)
+			os.WriteFile(filepath.Join(global.PWD, file), b, 755)
 		}
 		_, _ = f.Write(b)
 	}
