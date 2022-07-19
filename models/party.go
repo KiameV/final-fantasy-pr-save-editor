@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -43,39 +42,17 @@ func (p *Party) Clear() {
 }
 
 func (p *Party) AddPossibleMember(m *Member) {
-	//c := GetCharacterByID(m.CharacterID)
-
-	p.Possible[m.Name] = m
-
-	//if !c.IsNPC {
-	p.PossibleNames = append(p.PossibleNames, m.Name)
-	sort.Strings(p.PossibleNames)
-	//}
-
-	//p.PossibleNamesWithNPCs = append(p.PossibleNamesWithNPCs, m.Name)
-	//sort.Strings(p.PossibleNamesWithNPCs)
-}
-
-func (p *Party) SetMemberByID(slot int, characterID int) error {
-	for _, m := range p.Possible {
-		if characterID == m.CharacterID {
-			if slot < len(p.Members) {
-				p.Members[slot] = m
-			}
-			return nil
+	c, found := GetCharacter(m.CharacterID)
+	if !found {
+		return
+	}
+	if _, found = p.Possible[c.Name]; !found || c.IsEnabled {
+		p.Possible[c.Name] = m
+		if !found {
+			p.PossibleNames = append(p.PossibleNames, m.Name)
+			sort.Strings(p.PossibleNames)
 		}
 	}
-	return fmt.Errorf("failed to find character %d in list of possible characters", characterID)
-}
-
-func (p *Party) SetMemberByName(slot int, name string) error {
-	for _, m := range p.Possible {
-		if name == m.Name {
-			p.Members[slot] = m
-			return nil
-		}
-	}
-	return fmt.Errorf("failed to find %s in list of possible characters", name)
 }
 
 func (p *Party) GetPossibleIndex(m *Member) int {
@@ -90,4 +67,8 @@ func (p *Party) GetPossibleIndex(m *Member) int {
 		}
 	}
 	return 0
+}
+
+func (p *Party) SetMember(slot int, member *Member) {
+	p.Members[slot] = member
 }

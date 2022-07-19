@@ -70,7 +70,14 @@ func (p *PR) Load(fileName string) (err error) {
 	}
 	//s = p.fixFile(s)
 
-	if len(os.Args) >= 2 && os.Args[1] == "print" {
+	outputSave := false
+	for _, arg := range os.Args {
+		if arg == "print" || arg == "--print" {
+			outputSave = true
+			break
+		}
+	}
+	if outputSave {
 		if _, err = os.Stat("loaded.json"); errors.Is(err, os.ErrNotExist) {
 			if _, err = os.Create("loaded.json"); err != nil {
 			}
@@ -176,7 +183,7 @@ func (p *PR) loadParty() (err error) {
 		if err = json.Unmarshal([]byte(c.(string)), &member); err != nil {
 			return
 		}
-		party.SetMemberByID(slot, member.CharacterID)
+		party.SetMember(slot, &member)
 	}
 	return
 }

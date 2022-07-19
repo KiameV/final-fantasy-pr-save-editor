@@ -47,7 +47,9 @@ func (u *partyUI) drawRow(w *nucular.Window, slot int, selected *int) {
 func (u *partyUI) Refresh() {
 	p := models.GetParty()
 	for i, m := range p.Members {
-		u.selected[i] = p.GetPossibleIndex(m)
+		if m != nil {
+			u.selected[i] = p.GetPossibleIndex(m)
+		}
 	}
 }
 
