@@ -1,26 +1,27 @@
 package main
 
 import (
+	"image"
+	"image/color"
+	"strings"
+	"time"
+
 	"github.com/aarzilli/nucular"
 	"github.com/aarzilli/nucular/label"
 	"github.com/aarzilli/nucular/rect"
 	"github.com/aarzilli/nucular/style"
-	"image"
-	"image/color"
 	"pr_save_editor/browser"
 	"pr_save_editor/global"
 	"pr_save_editor/io"
-	"pr_save_editor/ui"
-	"pr_save_editor/ui/file"
-	mm "pr_save_editor/ui/mainMenu"
-	"strings"
-	"time"
+	"pr_save_editor/ui/old"
+	"pr_save_editor/ui/old/file"
+	mm "pr_save_editor/ui/old/mainMenu"
 )
 
-const version = "0.4.4"
+const version = "0.4.6"
 
 var (
-	mainMenu      ui.UI
+	mainMenu      old.UI
 	status        string
 	err           error
 	fileSelector  *file.FileSelector
@@ -49,7 +50,7 @@ func updateWindow(w *nucular.Window) {
 	w.MenubarBegin()
 	w.Row(12).Static(100, 100, 300, 200)
 	if w := w.Menu(label.TA("Load", "LC"), 100, nil); w != nil {
-		ui.DrawError = nil
+		old.DrawError = nil
 		w.Row(12).Dynamic(1)
 		if w.MenuItem(label.TA("I", "LC")) {
 			global.SetShowing(global.LoadPR)
@@ -78,7 +79,7 @@ func updateWindow(w *nucular.Window) {
 		}
 	}
 	if global.IsShowing(global.ShowPR) {
-		ui.DrawError = nil
+		old.DrawError = nil
 		if w := w.Menu(label.TA("Save", "LC"), 100, nil); w != nil {
 			fileSelector = file.NewFileSelector()
 			global.SetShowing(global.SavePR)
@@ -102,8 +103,8 @@ func updateWindow(w *nucular.Window) {
 		w.Close()
 	}
 
-	if ui.DrawError != nil {
-		popupErr(w, ui.DrawError)
+	if old.DrawError != nil {
+		popupErr(w, old.DrawError)
 	}
 
 	if status != "" {

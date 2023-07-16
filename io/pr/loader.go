@@ -3,6 +3,8 @@ package pr
 import (
 	"archive/zip"
 	"bytes"
+	"compress/flate"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,6 +21,7 @@ import (
 
 	jo "gitlab.com/c0b/go-ordered-json"
 	"pr_save_editor/global"
+	"pr_save_editor/io/pr/cypher"
 	"pr_save_editor/models"
 )
 
@@ -158,7 +161,6 @@ func (p *PR) loadParty() (err error) {
 		party = models.GetParty()
 		// id     int
 		// name   string
-		count  = 4
 		i      interface{}
 		member models.Member
 	)
@@ -177,10 +179,6 @@ func (p *PR) loadParty() (err error) {
 			Name:        name,
 		})
 	}*/
-	if global.GetSaveType() == global.Four {
-		count = 5
-	}
-	party.SetMemberCount(count)
 	if i, err = p.getFromTarget(p.UserData, CorpsList); err != nil {
 		return
 	}
@@ -188,7 +186,7 @@ func (p *PR) loadParty() (err error) {
 		if err = json.Unmarshal([]byte(c.(string)), &member); err != nil {
 			return
 		}
-		_ = party.SetMember(slot, &member)
+		party.SetMember(slot, &member)
 	}
 	return
 }
@@ -850,13 +848,43 @@ func (p *PR) getSaveData(s string) (string, error) {
 }
 
 func (p *PR) readFile(fileName string) (out []byte, err error) {
-	if out, err = p.execLoad(fileName, true); err != nil {
-		e1 := handleCmdError(out, err)
-		if out, err = p.execLoad(fileName, false); err != nil {
-			err = e1
-			return
-		}
+	var (
+		b []byte
+		d []byte
+		// password = "TKX73OHHK1qMonoICbpVT0hIDGe7SkW0"
+		// salt     = "71Ba2p0ULBGaE6oJ7TjCqwsls1jBKmRL"
+		// keyiv    = pbkdf2.Key([]byte(password), []byte(salt), 10, 64, sha1.New)
+		// key      = keyiv[:32]
+		// iv       = keyiv[32:]
+		// result   string
+		// count = 0
+	)
+	if b, err = os.ReadFile(fileName); err != nil {
+		return
 	}
+	// for count < 20 && len(d) == 0 {
+	// 	if err != nil {
+	// 		if e, ok := err.(base64.CorruptInputError); ok {
+	// 			if int64(e) == 0 {
+	// 				b = b[1:]
+	// 				for len(b)%4 != 0 {
+	// 					b = append(b, '=')
+	// 				}
+	// 			} else {
+	// 				b = b[:len(b)-1]
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	count++
+	// }
+	b = b[3:]
+	d, err = base64.StdEncoding.DecodeString(string(b))
+	r := cypher.NewRijndael()
+	out, err = r.Decrypt(d)
+	zr := flate.NewReader(bytes.NewReader(out))
+	out, err = io.ReadAll(zr)
+
 	return
 }
 
