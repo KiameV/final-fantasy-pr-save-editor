@@ -6,19 +6,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	jo "gitlab.com/c0b/go-ordered-json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"pr_save_editor/global"
-	"pr_save_editor/models"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+
+	jo "gitlab.com/c0b/go-ordered-json"
+	"pr_save_editor/global"
+	"pr_save_editor/models"
 )
 
 func (p *PR) Load(fileName string) (err error) {
@@ -33,11 +34,11 @@ func (p *PR) Load(fileName string) (err error) {
 	models.Characters = make([]*models.Character, 0, len(p.Characters))
 	models.CharacterNames = make([]string, 0, len(p.Characters))
 
-	//p.names = make([][]rune, 0, 40)
+	// p.names = make([][]rune, 0, 40)
 	if out, err = p.readFile(fileName); err != nil {
 		return
 	}
-	//ioutil.WriteFile("loaded.json", out, 0755)
+	// ioutil.WriteFile("loaded.json", out, 0755)
 	/*for i := 0; i < len(out); i++ {
 		if out[i] == '\\' && out[i+1] == 'x' {
 			j := string(out[i-20 : i+40])
@@ -48,9 +49,9 @@ func (p *PR) Load(fileName string) (err error) {
 	if s, err = p.getSaveData(string(out)); err != nil {
 		return
 	}
-	//if err == nil {
-	//err = ioutil.WriteFile("loaded_pre.json", out, 0755)
-	//}
+	// if err == nil {
+	// err = ioutil.WriteFile("loaded_pre.json", out, 0755)
+	// }
 	/*if strings.Contains(s, "\\x") {
 		// For foreign langauge, need to double-escape the x
 		p.getUnicodeNames(s)
@@ -68,7 +69,7 @@ func (p *PR) Load(fileName string) (err error) {
 		}
 		s = string(b)
 	}
-	//s = p.fixFile(s)
+	// s = p.fixFile(s)
 
 	outputSave := false
 	for _, arg := range os.Args {
@@ -96,9 +97,9 @@ func (p *PR) Load(fileName string) (err error) {
 		return
 	}
 
-	//if err = p.Base.UnmarshalJSON([]byte(s)); err != nil {
+	// if err = p.Base.UnmarshalJSON([]byte(s)); err != nil {
 	//	return
-	//}
+	// }
 
 	if err = p.unmarshalFrom(p.Base, UserData, p.UserData); err != nil {
 		return
@@ -127,9 +128,9 @@ func (p *PR) Load(fileName string) (err error) {
 	if err = p.loadCharacters(); err != nil {
 		return
 	}
-	if err = p.loadParty(); err != nil {
-		return
-	}
+	// if err = p.loadParty(); err != nil {
+	// 	return
+	// }
 	if err = p.loadMiscStats(); err != nil {
 		return
 	}
@@ -155,8 +156,9 @@ func (p *PR) Load(fileName string) (err error) {
 func (p *PR) loadParty() (err error) {
 	var (
 		party = models.GetParty()
-		//id     int
-		//name   string
+		// id     int
+		// name   string
+		count  = 4
 		i      interface{}
 		member models.Member
 	)
@@ -175,7 +177,10 @@ func (p *PR) loadParty() (err error) {
 			Name:        name,
 		})
 	}*/
-
+	if global.GetSaveType() == global.Four {
+		count = 5
+	}
+	party.SetMemberCount(count)
 	if i, err = p.getFromTarget(p.UserData, CorpsList); err != nil {
 		return
 	}
@@ -183,7 +188,7 @@ func (p *PR) loadParty() (err error) {
 		if err = json.Unmarshal([]byte(c.(string)), &member); err != nil {
 			return
 		}
-		party.SetMember(slot, &member)
+		_ = party.SetMember(slot, &member)
 	}
 	return
 }
@@ -212,12 +217,12 @@ func (p *PR) loadCharacters() (err error) {
 		}
 		models.CharacterNames = append(models.CharacterNames, c.Name)
 
-		//if pr.IsMainCharacter(c.Name) {
+		// if pr.IsMainCharacter(c.Name) {
 		models.GetParty().AddPossibleMember(&models.Member{
 			CharacterID: c.ID,
 			Name:        c.Name,
 		})
-		//}
+		// }
 
 		if c.IsEnabled, err = p.getBool(d, IsEnableCorps); err != nil {
 			return
@@ -680,7 +685,7 @@ func (p *PR) unmarshalFrom(from *jo.OrderedMap, key string, m *jo.OrderedMap) (e
 }
 
 func (p *PR) unmarshal(i interface{}, m *map[string]interface{}) error {
-	//s := strings.ReplaceAll(i.(string), `\\"`, `\"`)
+	// s := strings.ReplaceAll(i.(string), `\\"`, `\"`)
 	return json.Unmarshal([]byte(i.(string)), m)
 }
 

@@ -2,6 +2,8 @@ package importantInventory
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/aarzilli/nucular"
 	"pr_save_editor/consts"
 	"pr_save_editor/consts/ffv"
@@ -9,7 +11,6 @@ import (
 	"pr_save_editor/global"
 	"pr_save_editor/models"
 	"pr_save_editor/ui"
-	"strings"
 )
 
 type importantInventoryUI struct {

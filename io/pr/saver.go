@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	jo "gitlab.com/c0b/go-ordered-json"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
+
+	jo "gitlab.com/c0b/go-ordered-json"
 	"pr_save_editor/global"
 	"pr_save_editor/io"
 	"pr_save_editor/models"
-	"strings"
 )
 
 func (p *PR) Save(slot int, fileName string) (err error) {
@@ -19,7 +20,7 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 		toFile = filepath.Join(io.GetConfig().GetDir(global.GetSaveType()), fileName)
 		temp   = filepath.Join(global.PWD, "temp")
 		cmd    = exec.Command("cmd", "/C", "pr_io.exe", "obfuscateFile", toFile, temp)
-		//needed   = make(map[int]int)
+		// needed   = make(map[int]int)
 		slTarget = jo.NewOrderedMap()
 	)
 	cmd.Dir = strings.ReplaceAll(filepath.Join(global.PWD, "pr_io"), "\\", "/")
@@ -36,9 +37,9 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 	if err = p.saveMiscStats(); err != nil {
 		return
 	}
-	if err = p.saveParty(); err != nil {
-		return
-	}
+	// if err = p.saveParty(); err != nil {
+	//	return
+	// }
 	if err = p.saveMapData(); err != nil {
 		return
 	}
@@ -566,7 +567,7 @@ func (p *PR) getInvCount(eq *[]string, counts map[int]int, addedItems *[]int, id
 		i.ContentID = id
 		i.Count = count
 	} else {
-		//*addedItems = append(*addedItems, id)
+		// *addedItems = append(*addedItems, id)
 		i.ContentID = id
 		i.Count = 1
 	}
@@ -594,7 +595,7 @@ func (p *PR) revertUnicodeNames(b []byte) []byte {
 		s = strings.Replace(s, r.Replaced, r.Original, 1)
 	}
 	return []byte(s)
-	//strconv.Unquote(strings.Replace(strconv.Quote(string(original)), `\\x`, `\x`, -1));
+	// strconv.Unquote(strings.Replace(strconv.Quote(string(original)), `\\x`, `\x`, -1));
 	/*i := 0
 	for j := 0; j < len(p.names); j++ {
 		original := p.names[j].Original

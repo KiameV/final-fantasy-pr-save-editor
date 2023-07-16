@@ -1,8 +1,9 @@
 package mapData
 
 import (
-	"github.com/aarzilli/nucular"
 	"math"
+
+	"github.com/aarzilli/nucular"
 	"pr_save_editor/global"
 	"pr_save_editor/models"
 	"pr_save_editor/ui"

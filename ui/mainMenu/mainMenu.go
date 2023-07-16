@@ -8,7 +8,6 @@ import (
 	"pr_save_editor/ui/inventory"
 	"pr_save_editor/ui/mapData"
 	"pr_save_editor/ui/misc"
-	"pr_save_editor/ui/party"
 	"pr_save_editor/ui/transportation"
 )
 
@@ -20,7 +19,7 @@ func NewUI() ui.UI {
 	return &mainMenu{
 		uis: []ui.UI{
 			character.NewUI(),
-			party.NewUI(),
+			// party.NewUI(),
 			inventory.NewUI(),
 			importantInventory.NewUI(),
 			mapData.NewUI(),
