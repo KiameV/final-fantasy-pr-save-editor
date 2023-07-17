@@ -12,18 +12,18 @@ var EmptyPartyMember = &Member{
 type Member struct {
 	CharacterID int `json:"characterId"`
 	Name        string
-	//EnableEquipment bool
+	// EnableEquipment bool
 }
 
 var party *Party
 
 type Party struct {
-	Members       [4]*Member
+	Members       []*Member
 	Possible      map[string]*Member
 	PossibleNames []string
-	//PossibleNamesWithNPCs []string
-	//Enabled bool
-	//IncludeNPCs bool
+	// PossibleNamesWithNPCs []string
+	// Enabled bool
+	// IncludeNPCs bool
 }
 
 func GetParty() *Party {
@@ -37,8 +37,9 @@ func GetParty() *Party {
 func (p *Party) Clear() {
 	p.Possible = make(map[string]*Member)
 	p.PossibleNames = make([]string, 0, 40)
-	//p.PossibleNamesWithNPCs = make([]string, 0, 40)
+	// p.PossibleNamesWithNPCs = make([]string, 0, 40)
 	p.AddPossibleMember(EmptyPartyMember)
+	p.Members = p.Members[:0]
 }
 
 func (p *Party) AddPossibleMember(m *Member) {
@@ -57,9 +58,9 @@ func (p *Party) AddPossibleMember(m *Member) {
 
 func (p *Party) GetPossibleIndex(m *Member) int {
 	names := p.PossibleNames
-	//if p.IncludeNPCs {
+	// if p.IncludeNPCs {
 	//	names = p.PossibleNamesWithNPCs
-	//}
+	// }
 
 	for i, po := range names {
 		if m.Name == po {
@@ -69,6 +70,6 @@ func (p *Party) GetPossibleIndex(m *Member) int {
 	return 0
 }
 
-func (p *Party) SetMember(slot int, member *Member) {
-	p.Members[slot] = member
+func (p *Party) AddMember(member *Member) {
+	p.Members = append(p.Members, member)
 }

@@ -1,7 +1,6 @@
 package pr
 
 import (
-	"archive/zip"
 	"bytes"
 	"compress/flate"
 	"encoding/base64"
@@ -10,10 +9,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"reflect"
 	"sort"
 	"strconv"
@@ -52,26 +49,15 @@ func (p *PR) Load(fileName string) (err error) {
 	if s, err = p.getSaveData(string(out)); err != nil {
 		return
 	}
-	// if err == nil {
-	// err = ioutil.WriteFile("loaded_pre.json", out, 0755)
-	// }
+
+	// s = p.fixEscapeCharsForLoad(s)
 	/*if strings.Contains(s, "\\x") {
-		// For foreign langauge, need to double-escape the x
-		p.getUnicodeNames(s)
-		//for i, n := range p.names {
-		//	s = strings.Replace(s, n, fmt.Sprintf(";;;%d;;;", i), 1)
-		//}
-		s = strings.ReplaceAll(s, "\\x", "x")
-	}*/
-	s = strings.ReplaceAll(s, `\\r\\n`, "")
-	s = p.fixEscapeCharsForLoad(s)
-	if strings.Contains(s, "\\x") {
 		b := []byte(s)
 		if b, err = p.replaceUnicodeNames(b, &names); err != nil {
 			return
 		}
 		s = string(b)
-	}
+	}*/
 	// s = p.fixFile(s)
 
 	outputSave := false
@@ -131,9 +117,9 @@ func (p *PR) Load(fileName string) (err error) {
 	if err = p.loadCharacters(); err != nil {
 		return
 	}
-	// if err = p.loadParty(); err != nil {
-	// 	return
-	// }
+	if err = p.loadParty(); err != nil {
+		return
+	}
 	if err = p.loadMiscStats(); err != nil {
 		return
 	}
@@ -182,11 +168,11 @@ func (p *PR) loadParty() (err error) {
 	if i, err = p.getFromTarget(p.UserData, CorpsList); err != nil {
 		return
 	}
-	for slot, c := range i.([]interface{}) {
+	for _, c := range i.([]interface{}) {
 		if err = json.Unmarshal([]byte(c.(string)), &member); err != nil {
 			return
 		}
-		party.SetMember(slot, &member)
+		party.AddMember(&member)
 	}
 	return
 }
@@ -794,27 +780,6 @@ type idCount struct {
 	Count     int `json:"count"`
 }
 
-func (p *PR) execLoad(fileName string, omitFirstBytes bool) ([]byte, error) {
-	if _, err := os.Stat("pr_io"); err != nil {
-		if err = p.downloadPyExe(); err != nil {
-			return nil, err
-		}
-	}
-	if _, err := os.Stat("pr_io.zip"); err != nil {
-		_ = os.Remove("pr_io.zip")
-	}
-
-	s := "0"
-	if omitFirstBytes {
-		s = "1"
-	}
-
-	path := strings.ReplaceAll(filepath.Join(global.PWD, "pr_io"), "\\", "/")
-	cmd := exec.Command("cmd", "/C", "pr_io.exe", "deobfuscateFile", fileName, s)
-	cmd.Dir = path
-	return cmd.Output()
-}
-
 func handleCmdError(out []byte, err error) error {
 	if e, ok := err.(*exec.ExitError); ok {
 		return fmt.Errorf("failed to load file: " + string(e.Stderr))
@@ -828,63 +793,42 @@ func (p *PR) loadBase(s string) (err error) {
 
 func (p *PR) getSaveData(s string) (string, error) {
 	var (
-		start int
-		end   = strings.Index(s, `,"clearFlag`)
+		start = strings.Index(s, "{")
+		end   = strings.LastIndex(s, "}")
 	)
-	if end == -1 {
+	if start == -1 || end == -1 || start >= end {
 		return "", errors.New("unable to load file. Please try resaving to a new unused game slot and try loading that slot instead")
 	}
-	for start < len(s) && s[start] != '{' {
-		start++
+	if end+1 == len(s) {
+		return s[start:], nil
 	}
-	end = len(s) - 1
-	for end >= 0 && s[end] != '}' {
-		end--
-	}
-	if end+1 >= len(s) {
-		return "", errors.New("unable to load file. Please try resaving to a new unused game slot and try loading that slot instead")
-	}
-	return s[start : end+1], nil // + `,"playTime":0.0,"clearFlag":0}`, nil
+	return s[start : end+1], nil
 }
 
 func (p *PR) readFile(fileName string) (out []byte, err error) {
 	var (
 		b []byte
 		d []byte
-		// password = "TKX73OHHK1qMonoICbpVT0hIDGe7SkW0"
-		// salt     = "71Ba2p0ULBGaE6oJ7TjCqwsls1jBKmRL"
-		// keyiv    = pbkdf2.Key([]byte(password), []byte(salt), 10, 64, sha1.New)
-		// key      = keyiv[:32]
-		// iv       = keyiv[32:]
-		// result   string
-		// count = 0
 	)
 	if b, err = os.ReadFile(fileName); err != nil {
 		return
 	}
-	// for count < 20 && len(d) == 0 {
-	// 	if err != nil {
-	// 		if e, ok := err.(base64.CorruptInputError); ok {
-	// 			if int64(e) == 0 {
-	// 				b = b[1:]
-	// 				for len(b)%4 != 0 {
-	// 					b = append(b, '=')
-	// 				}
-	// 			} else {
-	// 				b = b[:len(b)-1]
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	count++
-	// }
-	b = b[3:]
-	d, err = base64.StdEncoding.DecodeString(string(b))
+	for len(b) > 0 && b[0] > 127 {
+		b = b[1:]
+	}
+	for len(b)%4 != 0 {
+		b = append(b, '=')
+	}
+	d, _ = base64.StdEncoding.DecodeString(string(b))
+	if len(d) == 0 {
+		return nil, errors.New("unable to load file")
+	}
 	r := cypher.NewRijndael()
-	out, err = r.Decrypt(d)
+	if out, err = r.Decrypt(d); err != nil {
+		return
+	}
 	zr := flate.NewReader(bytes.NewReader(out))
 	out, err = io.ReadAll(zr)
-
 	return
 }
 
@@ -960,110 +904,3 @@ type unicodeNameReplace struct {
 	Original string
 	Replaced string
 }
-
-func (p *PR) downloadPyExe() error {
-	var (
-		resp, err = http.Get("https://github.com/KiameV/pr_save_io/releases/download/latest/pr_io.zip")
-		out       *os.File
-		r         *zip.ReadCloser
-	)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	fmt.Println("status", resp.Status)
-	if resp.StatusCode != 200 {
-		return errors.New("failed to download the save file reader")
-	}
-
-	// Create the file
-	if out, err = os.Create("pr_io.zip"); err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Write the body to file
-	if _, err = io.Copy(out, resp.Body); err != nil {
-		return err
-	}
-
-	if r, err = zip.OpenReader("pr_io.zip"); err != nil {
-		return err
-	}
-	defer func() { _ = r.Close() }()
-
-	if err = os.Mkdir("./pr_io", 0755); err != nil {
-		return err
-	}
-
-	// Closure to address file descriptors issue with all the deferred .Close() methods
-	for _, f := range r.File {
-		if err = extractArchiveFile(".", f); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func extractArchiveFile(dest string, f *zip.File) (err error) {
-	var (
-		rc   io.ReadCloser
-		file *os.File
-		path string
-	)
-	if rc, err = f.Open(); err != nil {
-		return
-	}
-	defer func() { _ = rc.Close() }()
-
-	path = filepath.Join(dest, f.Name)
-	// Check for ZipSlip (Directory traversal)
-	path = strings.ReplaceAll(path, "..", "")
-
-	if f.FileInfo().IsDir() {
-		if err = os.MkdirAll(path, f.Mode()); err != nil {
-			return
-		}
-	} else {
-		if err = os.MkdirAll(filepath.Dir(path), f.Mode()); err != nil {
-			return
-		}
-		if file, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode()); err != nil {
-			return
-		}
-		defer func() { _ = file.Close() }()
-		if _, err = io.Copy(file, rc); err != nil {
-			return
-		}
-	}
-	return
-}
-
-/*
-d := []byte(s)
-		for i, c := range d {
-			if c == 'x' && d[i-1] == '\\' {
-				d[i] = '^'
-				d[i-1] = '^'
-			}
-		}
-
-func (p *PR) fixFile(s string) (bool, string) {
-	if i := strings.Index(s, "clearFlag"); i != -1 {
-		c := s[i+9]
-		if c != ':' {
-			cc := s[i+10]
-			if cc >= 48 && c <= 57 {
-				cc -= 48
-			} else {
-				cc = 0
-			}
-			s = s[:i+9] + fmt.Sprintf(`":%d}`, cc)
-		}
-		return true, s
-	} else if i = strings.Index(s, `"playTime`); i != -1 && s[i+4] >= 48 && s[i+4] <= 57 {
-		s = s[0:i] + `"playTime":0.0,"clearFlag":0}`
-		return true, s
-	}
-	return false, s
-}*/

@@ -5,13 +5,13 @@ import (
 )
 
 type PR struct {
-	//data       []byte
+	// data       []byte
 	Base       *jo.OrderedMap
 	UserData   *jo.OrderedMap
 	MapData    *jo.OrderedMap
 	Characters []*jo.OrderedMap
 	names      []unicodeNameReplace
-	//fileEnd    string
+	// fileEnd    string
 }
 
 func NewPR() *PR {

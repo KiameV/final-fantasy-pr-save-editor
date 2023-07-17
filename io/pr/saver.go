@@ -12,6 +12,7 @@ import (
 	jo "gitlab.com/c0b/go-ordered-json"
 	"pr_save_editor/global"
 	"pr_save_editor/io"
+	"pr_save_editor/io/pr/cypher"
 	"pr_save_editor/models"
 )
 
@@ -37,9 +38,9 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 	if err = p.saveMiscStats(); err != nil {
 		return
 	}
-	// if err = p.saveParty(); err != nil {
-	//	return
-	// }
+	if err = p.saveParty(); err != nil {
+		return
+	}
 	if err = p.saveMapData(); err != nil {
 		return
 	}
@@ -89,7 +90,7 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 			return fmt.Errorf("failed to create save file %s: %v", toFile, err)
 		}
 	}
-	defer os.Remove(temp)
+	defer func() { _ = os.Remove(temp) }()
 
 	/*/ TODO Debug
 	if _, err = os.Stat("saved.json"); errors.Is(err, os.ErrNotExist) {
@@ -112,24 +113,17 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 		data = p.revertUnicodeNames(data)
 	}
 
-	if err = os.WriteFile(temp, data, 0755); err != nil {
-		return fmt.Errorf("failed to create temp file %s: %v", toFile, err)
+	if data, err = cypher.NewRijndael().Encrypt(data); err != nil {
+		return
 	}
 
-	if _, err = os.Stat(toFile); errors.Is(err, os.ErrNotExist) {
-		if _, err = os.Create(toFile); err != nil {
-			return fmt.Errorf("failed to create save file %s: %v", toFile, err)
-		}
+	var f *os.File
+	if f, err = os.Create(toFile); err != nil {
+		return
 	}
 
-	var out []byte
-	out, err = cmd.Output()
-	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			err = errors.New(string(ee.Stderr))
-		} else {
-			err = fmt.Errorf("%s: %v", string(out), err)
-		}
+	if _, err = f.Write(data); err != nil {
+		return
 	}
 	return
 }
@@ -306,7 +300,7 @@ func (p *PR) saveParty() (err error) {
 		party   = models.GetParty()
 		partyID = p.getPartyID()
 		b       []byte
-		sl      = make([]interface{}, 4)
+		sl      = make([]interface{}, len(party.Members))
 	)
 	for i, m := range party.Members {
 		pm := partyMember{
