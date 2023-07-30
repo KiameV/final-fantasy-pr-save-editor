@@ -808,18 +808,22 @@ func (p *PR) getSaveData(s string) (string, error) {
 func (p *PR) readFile(fileName string) (out []byte, err error) {
 	var (
 		b []byte
+		c []byte
 		d []byte
+		i int
 	)
 	if b, err = os.ReadFile(fileName); err != nil {
 		return
 	}
-	for len(b) > 0 && b[0] > 127 {
-		b = b[1:]
+	c = b
+	for i = 0; len(c) > 1 && c[0] > 127; i++ {
+		c = b[i:]
 	}
-	for len(b)%4 != 0 {
-		b = append(b, '=')
+	p.fileTrimmed = b[:i-1]
+	for len(c)%4 != 0 {
+		c = append(c, '=')
 	}
-	d, _ = base64.StdEncoding.DecodeString(string(b))
+	d, _ = base64.StdEncoding.DecodeString(string(c))
 	if len(d) == 0 {
 		return nil, errors.New("unable to load file")
 	}

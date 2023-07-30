@@ -83,7 +83,7 @@ func (fs *FileSelector) drawLoadButton(w *nucular.Window, s *prSlot) (loaded boo
 		w.Row(30).Static(300, 50, 100)
 		if w.ButtonText("Load " + s.Name) {
 			p := pr.NewPR()
-			if err = p.Load(path.Join(io.GetConfig().GetDir(global.GetSaveType()), s.File.Name())); err == nil {
+			if _, err = p.Load(path.Join(io.GetConfig().GetDir(global.GetSaveType()), s.File.Name())); err == nil {
 				PrIO = p
 				global.FileName = s.File.Name()
 				loaded = true

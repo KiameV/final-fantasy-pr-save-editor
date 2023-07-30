@@ -1,8 +1,10 @@
 package pr
 
 import (
+	"bytes"
+	"compress/flate"
+	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -85,13 +87,6 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 		return
 	}
 
-	if _, err = os.Stat(temp); errors.Is(err, os.ErrNotExist) {
-		if _, err = os.Create(temp); err != nil {
-			return fmt.Errorf("failed to create save file %s: %v", toFile, err)
-		}
-	}
-	defer func() { _ = os.Remove(temp) }()
-
 	/*/ TODO Debug
 	if _, err = os.Stat("saved.json"); errors.Is(err, os.ErrNotExist) {
 		if _, err = os.Create("saved.json"); err != nil {
@@ -113,7 +108,7 @@ func (p *PR) Save(slot int, fileName string) (err error) {
 		data = p.revertUnicodeNames(data)
 	}
 
-	if data, err = cypher.NewRijndael().Encrypt(data); err != nil {
+	if data, err = p.createSave(data); err != nil {
 		return
 	}
 
@@ -581,6 +576,60 @@ func (p *PR) setTarget(d *jo.OrderedMap, key string, value []interface{}) (err e
 	}
 	b, err = t.MarshalJSON()
 	return p.setValue(d, key, string(b))
+}
+
+func (p *PR) createSave(in []byte) (out []byte, err error) {
+	if out, err = p.toFlate(in); err != nil {
+		return
+	}
+	if out, err = p.Encode(out); err != nil {
+		return
+	}
+	r := cypher.NewRijndael()
+	if out, err = r.Encrypt(out); err != nil {
+		return
+	}
+	s := string(out)
+	s = string(p.fileTrimmed) + strings.TrimRight(s, "=")
+	out = []byte(s)
+	for len(out)%4 != 0 {
+		out = append(out, '=')
+	}
+	return
+}
+
+func (p *PR) toFlate(in []byte) (out []byte, err error) {
+	var (
+		buf bytes.Buffer
+		w   *flate.Writer
+	)
+	if w, err = flate.NewWriter(&buf, 0); err != nil {
+		return
+	}
+	defer func() {
+		_ = w.Close()
+	}()
+	if _, err = w.Write(in); err != nil {
+		return
+	}
+	_ = w.Flush()
+	out = buf.Bytes()
+	return
+}
+
+func (p *PR) Encode(in []byte) (out []byte, err error) {
+	var (
+		buf bytes.Buffer
+		e   = base64.NewEncoder(base64.StdEncoding, &buf)
+	)
+	defer func() {
+		_ = e.Close()
+	}()
+	if _, err = e.Write(out); err != nil {
+		return
+	}
+	out = buf.Bytes()
+	return
 }
 
 func (p *PR) revertUnicodeNames(b []byte) []byte {

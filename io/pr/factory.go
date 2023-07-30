@@ -6,11 +6,12 @@ import (
 
 type PR struct {
 	// data       []byte
-	Base       *jo.OrderedMap
-	UserData   *jo.OrderedMap
-	MapData    *jo.OrderedMap
-	Characters []*jo.OrderedMap
-	names      []unicodeNameReplace
+	Base        *jo.OrderedMap
+	UserData    *jo.OrderedMap
+	MapData     *jo.OrderedMap
+	Characters  []*jo.OrderedMap
+	names       []unicodeNameReplace
+	fileTrimmed []byte
 	// fileEnd    string
 }
 

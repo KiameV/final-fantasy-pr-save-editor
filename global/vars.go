@@ -13,6 +13,7 @@ const (
 var (
 	PWD      string
 	FileName string
+	FileSlot int
 	showing  CurrentScreen
 	prevShow CurrentScreen
 	saveType SaveType

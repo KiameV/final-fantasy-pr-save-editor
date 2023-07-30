@@ -8,7 +8,9 @@ import (
 	"pr_save_editor/ui/io"
 )
 
-var m *fyne.MainMenu
+var (
+	m *fyne.MainMenu
+)
 
 func Get(onLoaded func(), w fyne.Window) *fyne.MainMenu {
 	if m == nil {
@@ -32,9 +34,14 @@ func Get(onLoaded func(), w fyne.Window) *fyne.MainMenu {
 			fyne.NewMenuItem("VI", func() {
 				load(onLoaded, global.Six, w)
 			}))
-
+		s := fyne.NewMenuItem("Save", func() {
+			save(w)
+		})
+		sa := fyne.NewMenuItem("Save As...", func() {
+			saveAs(w)
+		})
 		m = fyne.NewMainMenu(
-			fyne.NewMenu("File", l))
+			fyne.NewMenu("File", l, s, sa))
 	}
 	return m
 }
@@ -52,10 +59,35 @@ func AddSave() {
 }
 
 func load(onLoaded func(), st global.SaveType, w fyne.Window) {
-	io.Show("Load", func(file string) {
+	io.Show(io.Load, func(slot int, file string) {
 		if err := pr.NewPR().Load(file); err != nil {
 			dialog.ShowError(err, w)
+		} else {
+			onLoaded()
+			global.FileSlot = slot
+			global.FileName = file
+			global.SetSaveType(st)
 		}
-		onLoaded()
 	}, st, w)
+}
+
+func save(w fyne.Window) {
+	if global.FileName != "" && global.FileSlot > 0 {
+		if err := pr.NewPR().Save(global.FileSlot, global.FileName); err != nil {
+			dialog.ShowError(err, w)
+		}
+	} else {
+		saveAs(w)
+	}
+}
+
+func saveAs(w fyne.Window) {
+	io.Show(io.Save, func(slot int, file string) {
+		if err := pr.NewPR().Save(slot, file); err != nil {
+			dialog.ShowError(err, w)
+		} else {
+			global.FileSlot = slot
+			global.FileName = file
+		}
+	}, global.GetSaveType(), w)
 }

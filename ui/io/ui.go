@@ -3,11 +3,11 @@ package io
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	sqweek "github.com/sqweek/dialog"
@@ -20,6 +20,12 @@ type (
 		UUID string
 		Name string
 	}
+	IoKind bool
+)
+
+const (
+	Load IoKind = false
+	Save IoKind = true
 )
 
 var (
@@ -112,14 +118,18 @@ var (
 	grid *fyne.Container
 )
 
-func Show(label string, onSelected func(file string), st global.SaveType, w fyne.Window) {
+func Show(kind IoKind, onSelected func(slot int, file string), st global.SaveType, w fyne.Window) {
 	var (
-		dir = widget.NewEntry()
-		d   dialog.Dialog
+		dir   = widget.NewEntry()
+		d     dialog.Dialog
+		label = "Load"
 	)
+	if kind == Save {
+		label = "Save"
+	}
 	grid = container.NewGridWithColumns(2, widget.NewLabel("Name"), widget.NewLabel("Date"))
 	dir.OnChanged = func(s string) {
-		refresh(d, s, onSelected, st, w)
+		refresh(kind, d, s, onSelected, st, w)
 		d.Refresh()
 	}
 	d = dialog.NewCustom(label, "Cancel", container.NewBorder(
@@ -131,33 +141,69 @@ func Show(label string, onSelected func(file string), st global.SaveType, w fyne
 					}
 				}),
 				widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
-					refresh(d, dir.Text, onSelected, st, w)
-				})), dir), nil, nil, nil, grid), w)
+					refresh(kind, d, dir.Text, onSelected, st, w)
+				})), dir), nil, nil, nil,
+		container.NewVScroll(grid)), w)
 	dir.SetText(io.GetConfig().GetDir(st))
+	d.Resize(fyne.NewSize(550, 650))
 	d.Show()
 }
 
-func refresh(d dialog.Dialog, dir string, onSelected func(file string), st global.SaveType, w fyne.Window) {
+func refresh(kind IoKind, d dialog.Dialog, dir string, onSelected func(slot int, file string), st global.SaveType, w fyne.Window) {
 	grid.RemoveAll()
 	if dir == "" {
 		return
 	}
-	var i int
-	for _, s := range slots {
-		if _, err := os.Stat(filepath.Join(dir, s.UUID)); err == nil {
-			grid.Add(container.NewBorder(nil, nil, nil,
-				widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-					dialog.ShowConfirm("Delete?", "Delete "+s.Name+"?", func(b bool) {
-						if b {
-							_ = os.Remove(filepath.Join(dir, s.UUID))
-						}
-					}, w)
-				}),
-				widget.NewButton(s.Name, func() {
-					onSelected(filepath.Join(dir, s.UUID))
-					d.Hide()
-				})))
-			grid.Add(layout.NewSpacer())
+	var (
+		i     int
+		found bool
+		label string
+		err   error
+	)
+	for j, s := range slots {
+		var (
+			saveButton, deleteButton *widget.Button
+			k                        = j + 1
+			uuid                     = s.UUID
+		)
+		_, err = os.Stat(filepath.Join(dir, uuid))
+		found = err == nil
+
+		label = s.Name
+		if kind == Save && found {
+			label += " (Overwrite)"
+		}
+
+		deleteButton = widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+			dialog.ShowConfirm("Delete?", "Delete "+s.Name+"?", func(b bool) {
+				if b {
+					_ = os.Remove(filepath.Join(dir, uuid))
+				}
+			}, w)
+		})
+		saveButton = widget.NewButton(s.Name, func() {
+			if strings.Contains(saveButton.Text, "Overwrite") {
+				dialog.ShowConfirm("Overwrite?", "Overwrite "+s.Name+"?", func(b bool) {
+					if b {
+						onSelected(k, filepath.Join(dir, uuid))
+						d.Hide()
+					}
+				}, w)
+				return
+			} else {
+				onSelected(k, filepath.Join(dir, uuid))
+				d.Hide()
+			}
+		})
+
+		if kind == Load && !found {
+			deleteButton.Disable()
+			saveButton.Disable()
+		}
+
+		grid.Add(container.NewBorder(nil, nil, nil, deleteButton, saveButton))
+
+		if found {
 			i++
 		}
 	}
