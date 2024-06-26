@@ -14,18 +14,25 @@ import (
 const (
 	tagUrl = `https://api.github.com/repos/KiameV/final-fantasy-pr-save-editor/tags`
 	relUrl = `https://github.com/KiameV/final-fantasy-pr-save-editor/releases/%s`
+
+	Version = "0.8.0"
 )
 
-type tag struct {
-	Name string `json:"name"`
-}
+type (
+	tag struct {
+		Name string `json:"name"`
+	}
+	comp struct {
+		version [3]int
+	}
+)
 
-func CheckForUpdate(current string) (hasNewer bool, version string, err error) {
+func CheckForUpdate() (hasNewer bool, version string, err error) {
 	var (
-		r    *http.Response
-		b    []byte
-		tags []tag
-		vn   = versionToInt(current)
+		r          *http.Response
+		b          []byte
+		tags       []tag
+		current, _ = newComparable(Version)
 	)
 	if r, err = http.Get(tagUrl); err != nil {
 		return
@@ -39,23 +46,51 @@ func CheckForUpdate(current string) (hasNewer bool, version string, err error) {
 
 	for _, t := range tags {
 		if strings.Contains(t.Name, ".") {
-			i := versionToInt(t.Name)
-			if i > vn {
-				hasNewer = true
-				version = t.Name
-				vn = i
+			if other, ok := newComparable(t.Name); ok {
+				if IsNewer(current, other) {
+					current = other
+					hasNewer = true
+					version = t.Name
+				}
 			}
 		}
 	}
 	return
 }
 
-func versionToInt(v string) int {
-	if i, err := strconv.ParseInt(strings.ReplaceAll(v, ".", ""), 10, 32); err != nil {
-		return 0
-	} else {
-		return int(i)
+func newComparable(v string) (c comp, found bool) {
+	if strings.Contains(v, ".") && !strings.Contains(v, "_") {
+		var (
+			sb  strings.Builder
+			err error
+		)
+		for _, r := range v {
+			if r == '.' || (r >= '0' && r <= '9') {
+				sb.WriteRune(r)
+			}
+		}
+		for i, j := range strings.Split(sb.String(), ".") {
+			if c.version[i], err = strconv.Atoi(j); err != nil {
+				found = false
+				return
+			}
+		}
+		found = true
 	}
+	return
+}
+
+func IsNewer(current, other comp) bool {
+	for i := 0; i < 3; i++ {
+		c := current.version[i]
+		o := other.version[i]
+		if c < o {
+			return true
+		} else if c != o {
+			return false
+		}
+	}
+	return false
 }
 
 func Update(tag string) (err error) {

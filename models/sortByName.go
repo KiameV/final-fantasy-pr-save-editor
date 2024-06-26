@@ -1,6 +1,8 @@
 package models
 
-import "sort"
+import (
+	"sort"
+)
 
 func SortByName(nsms []*NameSlotMask8) []*NameSlotMask8 {
 	var (

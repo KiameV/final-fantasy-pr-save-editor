@@ -10,47 +10,12 @@ const (
 	WindowHeight = 800
 )
 
-var (
-	PWD      string
-	FileName string
-	showing  CurrentScreen
-	prevShow CurrentScreen
-	saveType SaveType
+type (
+	Game byte
 )
 
-type CurrentScreen byte
-
 const (
-	Blank CurrentScreen = iota
-	LoadPR
-	SavePR
-	ShowPR
-)
-
-func RollbackShowing() CurrentScreen {
-	showing = prevShow
-	return showing
-}
-
-func GetCurrentShowing() CurrentScreen {
-	return showing
-}
-
-func SetShowing(s CurrentScreen) {
-	if showing != prevShow {
-		prevShow = showing
-	}
-	showing = s
-}
-
-func IsShowing(s CurrentScreen) bool {
-	return s == showing
-}
-
-type SaveType byte
-
-const (
-	Unspecified SaveType = iota
+	Unspecified Game = iota
 	One
 	Two
 	Three
@@ -59,13 +24,24 @@ const (
 	Six
 )
 
-func GetSaveType() SaveType {
-	return saveType
+func (g Game) IsOne() bool   { return g == One }
+func (g Game) IsTwo() bool   { return g == Two }
+func (g Game) IsThree() bool { return g == Three }
+func (g Game) IsFour() bool  { return g == Four }
+func (g Game) IsFive() bool  { return g == Five }
+func (g Game) IsSix() bool   { return g == Six }
+func (g Game) IsAny(game ...Game) bool {
+	for _, v := range game {
+		if g == v {
+			return true
+		}
+	}
+	return false
 }
 
-func SetSaveType(st SaveType) {
-	saveType = st
-}
+var (
+	PWD string
+)
 
 func init() {
 	var err error
