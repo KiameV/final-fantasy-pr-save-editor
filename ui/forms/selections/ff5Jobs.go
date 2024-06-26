@@ -40,8 +40,12 @@ func NewFF5Jobs(c *core.Character) *FF5Job {
 
 	e.add = &addJob{parent: e}
 	e.add.Button = widget.NewButton("Add Job", func() {})
-	e.update()
 	e.add.update(c)
+
+	for _, job := range e.c.Jobs {
+		name, _ := finder.Jobs(job.ID)
+		e.addRow(name, job)
+	}
 	return e
 }
 
@@ -57,27 +61,25 @@ func (e *FF5Job) CreateRenderer() fyne.WidgetRenderer {
 		nil, body, inputs.GetSearches().Jobs.Fields()))
 }
 
-func (e *FF5Job) update() {
-	e.body.RemoveAll()
-	for _, job := range e.c.Jobs {
-		name, _ := finder.Jobs(job.ID)
-		func(name string, job *save.Job) {
-			e.body.Add(container.NewGridWithColumns(4,
-				widget.NewLabel(name),
-				inputs.NewIntEntryWithData(&job.Level),
-				inputs.NewIntEntryWithData(&job.CurrentProficiency),
-				widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
-					e.removeJob(job.ID)
-				})))
-		}(name, job)
-	}
+func (e *FF5Job) addRow(name string, job *save.Job) {
+	var g *fyne.Container
+	g = container.NewGridWithColumns(4,
+		widget.NewLabel(name),
+		inputs.NewIntEntryWithData(&job.Level),
+		inputs.NewIntEntryWithData(&job.CurrentProficiency),
+		widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
+			e.removeJob(job.ID)
+			e.body.Remove(g)
+		}))
+	e.body.Add(g)
 }
 
 func (e *FF5Job) addJob(s string) {
 	id, _ := e.lookup[s]
-	e.c.Jobs = append(e.c.Jobs, &save.Job{ID: id, Level: 1})
+	j := &save.Job{ID: id, Level: 1}
+	e.c.Jobs = append(e.c.Jobs, j)
+	e.addRow(s, j)
 	e.add.update(e.c)
-	e.update()
 }
 
 func (e *FF5Job) removeJob(id int) {
@@ -88,7 +90,6 @@ func (e *FF5Job) removeJob(id int) {
 		}
 	}
 	e.add.update(e.c)
-	e.update()
 }
 
 func (b *addJob) update(c *core.Character) {

@@ -14,15 +14,17 @@ type (
 		Commands           []int
 		Abilities          []*save.Ability
 		AbilitySlotData    []*save.AbilitySlotData
+		abilitiesLookup    map[int]*save.Ability
 		Jobs               []*save.Job
 		Equipment          *save.EquipmentList
 		AdditionAbilityIds []int
 		// SortOrderOwnedAbilityIdsInternal ???
-		AbilityDictionary *save.AbilityDictionary
+		// AbilityDictionary *save.AbilityDictionary
 		SkillLevelTargets *save.SkillLevelTargets
 		// LearningAbilities ???
 		EquipmentAbilities []int
 		EnableCommandsSave bool
+		// LearningAbilities  []int
 	}
 	Characters struct {
 		characters []*Character
@@ -45,7 +47,8 @@ func NewCharacters(game global.Game, in *save.OwnedCharacterList) (c *Characters
 
 func NewCharacter(game global.Game, in *save.OwnedCharacter) (c *Character, err error) {
 	c = &Character{
-		Base: in,
+		Base:            in,
+		abilitiesLookup: make(map[int]*save.Ability),
 	}
 
 	if c.Parameters, err = in.CharacterParameters(); err != nil {
@@ -57,29 +60,32 @@ func NewCharacter(game global.Game, in *save.OwnedCharacter) (c *Character, err 
 		return
 	}
 	c.Commands = cl.Target
-
 	if c.Abilities, err = in.Abilities(); err != nil {
 		return
 	}
-
 	if c.AbilitySlotData, err = in.AbilitySlotData(); err != nil {
 		return
 	}
-
 	if c.AdditionAbilityIds, err = c.Base.AdditionOrderOwnedAbilityIds(); err != nil {
 		return
 	}
-
+	// if c.AbilityDictionary, err = in.AbilityDictionary(); err != nil {
+	// 	return
+	// }
+	// if c.LearningAbilities, err = in.LearningAbilities(); err != nil {
+	// 	return
+	// }
 	if c.SkillLevelTargets, err = in.SkillLevelTargets(); err != nil {
 		return
 	}
-
 	if c.Equipment, err = in.Equipment(); err != nil {
 		return
 	}
-
 	if c.Jobs, err = in.Jobs(); err != nil {
 		return
+	}
+	for _, ability := range c.Abilities {
+		c.abilitiesLookup[ability.AbilityID] = ability
 	}
 	return
 }
@@ -118,10 +124,23 @@ func (c *Characters) GetByName(name string) (character *Character, found bool) {
 }
 
 func (c *Character) AddAbility(ability *save.Ability) {
-	c.Abilities = append(c.Abilities, ability)
+	if _, ok := c.abilitiesLookup[ability.AbilityID]; !ok {
+		c.Abilities = append(c.Abilities, ability)
+	}
 }
 
-func (c *Character) RemoveAbility(index int) {
+func (c *Character) RemoveAbility(ability *save.Ability) {
+	for i, a := range c.Abilities {
+		if a.AbilityID == ability.AbilityID {
+			c.RemoveAbilityIndex(i)
+			break
+		}
+	}
+}
+
+func (c *Character) RemoveAbilityIndex(index int) {
+	a := c.Abilities[index]
+	delete(c.abilitiesLookup, a.AbilityID)
 	c.Abilities = append(c.Abilities[:index], c.Abilities[index+1:]...)
 }
 
@@ -133,6 +152,11 @@ func (c *Character) AbilitiesToSave() []*save.Ability {
 		}
 	}
 	return a
+}
+
+func (c *Character) HasAbility(id int) bool {
+	_, ok := c.abilitiesLookup[id]
+	return ok
 }
 
 func (c *Character) ToSave() (s string, err error) {
@@ -151,6 +175,15 @@ func (c *Character) ToSave() (s string, err error) {
 		return
 	}
 	if err = c.Base.SetAdditionOrderOwnedAbilityIds(c.AdditionAbilityIds); err != nil {
+		return
+	}
+	// if err = c.Base.SetAbilityDictionary(c.AbilityDictionary); err != nil {
+	// 	return
+	// }
+	// if err = c.Base.SetLearningAbilities(c.LearningAbilities); err != nil {
+	// 	return
+	// }
+	if err = c.Base.SetJobs(c.Jobs); err != nil {
 		return
 	}
 	if err = c.Base.SetSkillLevelTargets(c.SkillLevelTargets); err != nil {

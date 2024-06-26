@@ -9,11 +9,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"pixel-remastered-save-editor/global"
 	"pixel-remastered-save-editor/models"
-	one "pixel-remastered-save-editor/models/core/ff1/consts"
-	two "pixel-remastered-save-editor/models/core/ff2/consts"
-	three "pixel-remastered-save-editor/models/core/ff3/consts"
-	four "pixel-remastered-save-editor/models/core/ff4/consts"
-	five "pixel-remastered-save-editor/models/core/ff5/consts"
+	"pixel-remastered-save-editor/models/core/costs/ff1"
+	"pixel-remastered-save-editor/models/core/costs/ff2"
+	"pixel-remastered-save-editor/models/core/costs/ff3"
+	"pixel-remastered-save-editor/models/core/costs/ff4"
+	"pixel-remastered-save-editor/models/core/costs/ff5"
 	"pixel-remastered-save-editor/models/finder"
 )
 
@@ -44,57 +44,57 @@ func GetSearches() *Searches {
 
 func Load(game global.Game) {
 	_s = &Searches{
-		Characters: newSearch(finder.AllCharacters()),
+		Characters: NewSearch(finder.AllCharacters()),
 	}
 	if game == global.One {
-		_s.Abilities = newSearch(one.Abilities)
-		_s.Commands = newSearch(one.Commands)
-		_s.Equipment = newSearch(one.Weapons, one.Shields, one.Armors, one.Helmets, one.Gloves)
-		_s.Items = newSearch(one.Items)
-		_s.ImportantItems = newSearch(one.ImportantItems)
-		_s.ItemsEquipment = newSearch(one.Items, one.Weapons, one.Shields, one.Armors, one.Helmets, one.Gloves)
-		_s.Jobs = newSearch(one.Jobs)
-		_s.Maps = newSearch(one.Maps)
+		_s.Abilities = NewSearch(ff1.Abilities)
+		_s.Commands = NewSearch(ff1.Commands)
+		_s.Equipment = NewSearch(ff1.Weapons, ff1.Shields, ff1.Armors, ff1.Helmets, ff1.Gloves)
+		_s.Items = NewSearch(ff1.Items)
+		_s.ImportantItems = NewSearch(ff1.ImportantItems)
+		_s.ItemsEquipment = NewSearch(ff1.Items, ff1.Weapons, ff1.Shields, ff1.Armors, ff1.Helmets, ff1.Gloves)
+		_s.Jobs = NewSearch(ff1.Jobs)
+		_s.Maps = NewSearch(ff1.Maps)
 	} else if game == global.Two {
-		_s.Abilities = newSearchFF2(two.Abilities)
-		_s.Commands = newSearch(two.Commands)
-		_s.Equipment = newSearch(two.Weapons, two.Shields, two.Armors, two.Helmets, two.Gloves)
-		_s.ItemsEquipment = newSearch(two.Items, two.Weapons, two.Shields, two.Armors, two.Helmets, two.Gloves)
-		_s.Items = newSearch(two.Items)
-		_s.Jobs = newSearch(two.Jobs)
-		_s.Maps = newSearch(two.Maps)
+		_s.Abilities = newSearchFF2(ff2.Abilities)
+		_s.Commands = NewSearch(ff2.Commands)
+		_s.Equipment = NewSearch(ff2.Weapons, ff2.Shields, ff2.Armors, ff2.Helmets, ff2.Gloves)
+		_s.ItemsEquipment = NewSearch(ff2.Items, ff2.Weapons, ff2.Shields, ff2.Armors, ff2.Helmets, ff2.Gloves)
+		_s.Items = NewSearch(ff2.Items)
+		_s.Jobs = NewSearch(ff2.Jobs)
+		_s.Maps = NewSearch(ff2.Maps)
 	} else if game == global.Three {
-		_s.Abilities = newSearch(three.Abilities, three.WhiteMagic, three.BlackMagic, three.SummonMagic)
-		_s.Commands = newSearch(three.Commands)
-		_s.Equipment = newSearch(three.Weapons, three.Shields, three.Armors, three.Helmets, three.Hands)
-		_s.Items = newSearch(three.Items)
-		_s.ImportantItems = newSearch(three.ImportantItems)
-		_s.ItemsEquipment = newSearch(three.Items, three.Weapons, three.Shields, three.Armors, three.Helmets, three.Hands)
-		_s.Jobs = newSearch(three.Jobs)
-		_s.Maps = newSearch(three.Maps)
+		_s.Abilities = NewSearch(ff3.Abilities, ff3.WhiteMagic, ff3.BlackMagic, ff3.SummonMagic)
+		_s.Commands = NewSearch(ff3.Commands)
+		_s.Equipment = NewSearch(ff3.Weapons, ff3.Shields, ff3.Armors, ff3.Helmets, ff3.Hands)
+		_s.Items = NewSearch(ff3.Items)
+		_s.ImportantItems = NewSearch(ff3.ImportantItems)
+		_s.ItemsEquipment = NewSearch(ff3.Items, ff3.Weapons, ff3.Shields, ff3.Armors, ff3.Helmets, ff3.Hands)
+		_s.Jobs = NewSearch(ff3.Jobs)
+		_s.Maps = NewSearch(ff3.Maps)
 	} else if game == global.Four {
-		_s.Abilities = newSearch(four.Abilities, four.WhiteMagic, four.BlackMagic, four.SummonMagic)
-		_s.Commands = newSearch(four.Commands)
-		_s.Equipment = newSearch(four.Weapons, four.Shields, four.Armors, four.Helmets, four.Hands)
-		_s.Items = newSearch(four.Items)
-		_s.ImportantItems = newSearch(four.ImportantItems)
-		_s.ItemsEquipment = newSearch(four.Items, four.Weapons, four.Shields, four.Armors, four.Helmets, four.Hands)
-		_s.Jobs = newSearch(four.Jobs)
-		_s.Maps = newSearch(four.Maps)
+		_s.Abilities = NewSearch(ff4.Abilities, ff4.WhiteMagic, ff4.BlackMagic, ff4.SummonMagic)
+		_s.Commands = NewSearch(ff4.Commands)
+		_s.Equipment = NewSearch(ff4.Weapons, ff4.Shields, ff4.Armors, ff4.Helmets, ff4.Hands)
+		_s.Items = NewSearch(ff4.Items)
+		_s.ImportantItems = NewSearch(ff4.ImportantItems)
+		_s.ItemsEquipment = NewSearch(ff4.Items, ff4.Weapons, ff4.Shields, ff4.Armors, ff4.Helmets, ff4.Hands)
+		_s.Jobs = NewSearch(ff4.Jobs)
+		_s.Maps = NewSearch(ff4.Maps)
 	} else if game == global.Five {
-		_s.Abilities = newSearch(five.Abilities, five.WhiteMagic, five.BlackMagic, five.SummonMagic, five.TimeMagic)
-		_s.Commands = newSearch(five.Commands)
-		_s.Equipment = newSearch(five.Weapons, five.Shields, five.Armors, five.Helmets, five.Hands)
-		_s.Items = newSearch(five.Items)
-		_s.ItemsEquipment = newSearch(five.Items, five.Weapons, five.Shields, five.Armors, five.Helmets, five.Hands)
-		_s.Jobs = newSearch(five.Jobs)
-		_s.Maps = newSearch(five.Maps)
+		_s.Abilities = NewSearch(ff5.Abilities, ff5.Spellblade, ff5.WhiteMagic, ff5.BlackMagic, ff5.SummonMagic, ff5.TimeMagic, ff5.BlueMagic, ff5.Songs)
+		_s.Commands = NewSearch(ff5.Commands)
+		_s.Equipment = NewSearch(ff5.Weapons, ff5.Shields, ff5.Armors, ff5.Helmets, ff5.Hands)
+		_s.Items = NewSearch(ff5.Items)
+		_s.ItemsEquipment = NewSearch(ff5.Items, ff5.Weapons, ff5.Shields, ff5.Armors, ff5.Helmets, ff5.Hands)
+		_s.Jobs = NewSearch(ff5.Jobs)
+		_s.Maps = NewSearch(ff5.Maps)
 	} else { // Six
 
 	}
 }
 
-func newSearch(nvss ...[]models.NameValue) *Search {
+func NewSearch(nvss ...[]models.NameValue) *Search {
 	s := &Search{
 		Text:    widget.NewTextGrid(),
 		Input:   widget.NewEntry(),

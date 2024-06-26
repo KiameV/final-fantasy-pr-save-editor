@@ -157,6 +157,10 @@ func (s *Save) preSave() (err error) {
 			err = s.preCharacterSaveFF3(c)
 		} else if game == global.Four {
 			err = s.preCharacterSaveFF4(c)
+		} else if game == global.Five {
+			err = s.preCharacterSaveFF5(c)
+		} else { // six
+			err = s.preCharacterSaveFF6(c)
 		}
 		if err != nil {
 			return
@@ -221,6 +225,24 @@ func (s *Save) preCharacterSaveFF4(c *Character) (err error) {
 	for _, a := range c.Abilities {
 		if a.ContentID == 0 && a.AbilityID > 0 {
 			a.ContentID = a.AbilityID + 310
+		}
+	}
+	return
+}
+
+func (s *Save) preCharacterSaveFF5(c *Character) (err error) {
+	for _, a := range c.Abilities {
+		if a.ContentID == 0 && a.AbilityID > 0 {
+			a.ContentID = a.AbilityID + 266
+		}
+	}
+	return
+}
+
+func (s *Save) preCharacterSaveFF6(c *Character) (err error) {
+	for _, a := range c.Abilities {
+		if a.ContentID == 0 && a.AbilityID > 0 {
+			// TODO
 		}
 	}
 	return

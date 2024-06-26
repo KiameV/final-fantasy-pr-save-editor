@@ -7,12 +7,12 @@ import (
 	"pixel-remastered-save-editor/global"
 	"pixel-remastered-save-editor/models"
 	"pixel-remastered-save-editor/models/core"
-	one "pixel-remastered-save-editor/models/core/ff1/consts"
-	two "pixel-remastered-save-editor/models/core/ff2/consts"
-	three "pixel-remastered-save-editor/models/core/ff3/consts"
-	four "pixel-remastered-save-editor/models/core/ff4/consts"
-	five "pixel-remastered-save-editor/models/core/ff5/consts"
-	six "pixel-remastered-save-editor/models/core/ff6/consts"
+	"pixel-remastered-save-editor/models/core/costs/ff1"
+	"pixel-remastered-save-editor/models/core/costs/ff2"
+	"pixel-remastered-save-editor/models/core/costs/ff3"
+	"pixel-remastered-save-editor/models/core/costs/ff4"
+	"pixel-remastered-save-editor/models/core/costs/ff5"
+	"pixel-remastered-save-editor/models/core/costs/ff6"
 )
 
 type (
@@ -44,63 +44,71 @@ var (
 func Load(game global.Game, characters []*core.Character) {
 	if game == global.One {
 		singletonFinder = &finders{
-			abilities: nameLookup(one.Abilities),
-			commands:  nameLookup(one.Commands),
-			important: nameLookup(one.ImportantItems),
-			items:     nameLookup(one.Items, one.Weapons, one.Shields, one.Armors, one.Helmets, one.Gloves),
-			jobs:      nameLookup(one.Jobs),
+			abilities: nameLookup(ff1.Abilities),
+			commands:  nameLookup(ff1.Commands),
+			important: nameLookup(ff1.ImportantItems),
+			items:     nameLookup(ff1.Items, ff1.Weapons, ff1.Shields, ff1.Armors, ff1.Helmets, ff1.Gloves),
+			jobs:      nameLookup(ff1.Jobs),
 			maps:      nameLookup(),
 		}
 	} else if game == global.Two {
 		singletonFinder = &finders{
-			abilities: nameLookup(two.Abilities),
-			commands:  nameLookup(two.Commands),
+			abilities: nameLookup(ff2.Abilities),
+			commands:  nameLookup(ff2.Commands),
 			important: nameLookup(),
-			items:     nameLookup(two.Items, two.Weapons, two.Shields, two.Armors, two.Helmets, two.Gloves),
-			jobs:      nameLookup(two.Jobs),
-			maps:      nameLookup(two.Maps),
+			items:     nameLookup(ff2.Items, ff2.Weapons, ff2.Shields, ff2.Armors, ff2.Helmets, ff2.Gloves),
+			jobs:      nameLookup(ff2.Jobs),
+			maps:      nameLookup(ff2.Maps),
 		}
 	} else if game == global.Three {
 		singletonFinder = &finders{
-			abilities: nameLookup(three.Abilities, three.WhiteMagic, three.BlackMagic, three.SummonMagic),
-			commands:  nameLookup(three.Commands),
-			important: nameLookup(three.ImportantItems),
-			items:     nameLookup(three.Items, three.Weapons, three.Shields, three.Armors, three.Helmets, three.Hands),
-			jobs:      nameLookup(three.Jobs),
-			maps:      nameLookup(three.Maps),
+			abilities: nameLookup(ff3.Abilities, ff3.WhiteMagic, ff3.BlackMagic, ff3.SummonMagic),
+			commands:  nameLookup(ff3.Commands),
+			important: nameLookup(ff3.ImportantItems),
+			items:     nameLookup(ff3.Items, ff3.Weapons, ff3.Shields, ff3.Armors, ff3.Helmets, ff3.Hands),
+			jobs:      nameLookup(ff3.Jobs),
+			maps:      nameLookup(ff3.Maps),
 		}
 	} else if game == global.Four {
 		singletonFinder = &finders{
-			abilities: nameLookup(four.Abilities, four.WhiteMagic, four.BlackMagic, four.SummonMagic),
-			commands:  nameLookup(four.Commands),
-			important: nameLookup(four.ImportantItems),
-			items:     nameLookup(four.Items, four.Weapons, four.Shields, four.Armors, four.Helmets, four.Hands),
-			jobs:      nameLookup(four.Jobs),
-			maps:      nameLookup(four.Maps),
+			abilities: nameLookup(ff4.Abilities, ff4.WhiteMagic, ff4.BlackMagic, ff4.SummonMagic),
+			commands:  nameLookup(ff4.Commands),
+			important: nameLookup(ff4.ImportantItems),
+			items:     nameLookup(ff4.Items, ff4.Weapons, ff4.Shields, ff4.Armors, ff4.Helmets, ff4.Hands),
+			jobs:      nameLookup(ff4.Jobs),
+			maps:      nameLookup(ff4.Maps),
 		}
 	} else if game == global.Five {
 		singletonFinder = &finders{
-			abilities: nameLookup(five.Abilities, five.WhiteMagic, five.BlackMagic, five.SummonMagic, five.TimeMagic),
-			commands:  nameLookup(five.Commands),
-			important: nameLookup(five.ImportantItems),
-			items:     nameLookup(five.Items, five.Weapons, five.Shields, five.Armors, five.Helmets, five.Hands),
-			jobs:      nameLookup(five.Jobs),
-			maps:      nameLookup(five.Maps),
+			abilities: nameLookup(ff5.Abilities, ff5.Spellblade, ff5.WhiteMagic, ff5.BlackMagic, ff5.SummonMagic, ff5.TimeMagic, ff5.BlueMagic, ff5.Songs),
+			commands:  nameLookup(ff5.Commands),
+			important: nameLookup(ff5.ImportantItems),
+			items:     nameLookup(ff5.Items, ff5.Weapons, ff5.Shields, ff5.Armors, ff5.Helmets, ff5.Hands),
+			jobs:      nameLookup(ff5.Jobs),
+			maps:      nameLookup(ff5.Maps),
 		}
 	} else { // Six
 		var temp []models.NameValue
 		singletonFinder = &finders{
-			abilities: nameLookup(six.Blitzes, six.Dances, six.Lores, six.Bushidos, six.Rages),
+			abilities: nameLookup(ff6.Blitzes, ff6.Dances, ff6.Lores, ff6.Bushidos, ff6.Rages),
 			commands:  nameLookup(temp),
 			important: nameLookup(temp),
-			items:     six.ItemsByID,
-			jobs:      nameLookup(six.Jobs),
+			items:     ff6.ItemsByID,
+			jobs:      nameLookup(ff6.Jobs),
 			maps:      nameLookup(temp),
 		}
 	}
 	singletonFinder.characters = make(map[int]string)
 	for _, c := range characters {
 		singletonFinder.characters[c.Base.ID] = c.Base.Name
+	}
+}
+
+func New(abilities []models.NameValue) Find {
+	l := nameLookup(abilities)
+	return func(i int) (s string, b bool) {
+		s, b = l[i]
+		return
 	}
 }
 

@@ -133,15 +133,19 @@ type (
 		Target []any `json:"target"`
 	}
 	AbilityDictionary struct {
-		Keys   []any `json:"keys"`
-		Values []any `json:"values"`
+		Keys           []int        `json:"keys"`
+		ValuesInternal []string     `json:"values"`
+		Values         [][]*Ability `json:"-"`
+	}
+	AbilityDictionaryTargets struct {
+		Target []string `json:"target"`
 	}
 	SkillLevelTargets struct {
 		Keys   []int `json:"keys"`
 		Values []int `json:"values"`
 	}
 	LearningAbilities struct {
-		Target []any `json:"target"`
+		Target []int `json:"target"`
 	}
 	EquipmentAbilities struct {
 		Target []int `json:"target"`
@@ -342,11 +346,36 @@ func (d *OwnedCharacter) SetSortOrderOwnedAbilityIds(v *SortOrderOwnedAbilityIds
 }
 
 func (d *OwnedCharacter) AbilityDictionary() (v *AbilityDictionary, err error) {
-	return UnmarshalOne[AbilityDictionary](d.AbilityDictionaryInternal)
+	if v, err = UnmarshalOne[AbilityDictionary](d.AbilityDictionaryInternal); err == nil {
+		var t []*AbilityDictionaryTargets
+		if t, err = UnmarshalMany[AbilityDictionaryTargets](v.ValuesInternal); err == nil {
+			v.Values = make([][]*Ability, len(t))
+			for i, j := range t {
+				v.Values[i] = make([]*Ability, len(j.Target))
+				for k, l := range j.Target {
+					if v.Values[i][k], err = UnmarshalOne[Ability](l); err != nil {
+						return
+					}
+				}
+			}
+		}
+	}
+	return
 }
 
 func (d *OwnedCharacter) SetAbilityDictionary(v *AbilityDictionary) (err error) {
-	d.AbilityDictionaryInternal, err = MarshalOne[AbilityDictionary](v)
+	t := make([]*AbilityDictionaryTargets, len(v.Values))
+	for i, j := range v.Values {
+		t[i] = &AbilityDictionaryTargets{Target: make([]string, len(j))}
+		for k, l := range j {
+			if t[i].Target[k], err = MarshalOne[Ability](l); err != nil {
+				return
+			}
+		}
+	}
+	if v.ValuesInternal, err = MarshalMany[AbilityDictionaryTargets](t); err == nil {
+		d.AbilityDictionaryInternal, err = MarshalOne[AbilityDictionary](v)
+	}
 	return
 }
 
@@ -359,12 +388,16 @@ func (d *OwnedCharacter) SetSkillLevelTargets(v *SkillLevelTargets) (err error) 
 	return
 }
 
-func (d *OwnedCharacter) LearningAbilities() (v *LearningAbilities, err error) {
-	return UnmarshalOne[LearningAbilities](d.LearningAbilitiesInternal)
+func (d *OwnedCharacter) LearningAbilities() (v []int, err error) {
+	var l *LearningAbilities
+	if l, err = UnmarshalOne[LearningAbilities](d.LearningAbilitiesInternal); err == nil {
+		v = l.Target
+	}
+	return
 }
 
-func (d *OwnedCharacter) SetLearningAbilities(v *LearningAbilities) (err error) {
-	d.LearningAbilitiesInternal, err = MarshalOne[LearningAbilities](v)
+func (d *OwnedCharacter) SetLearningAbilities(v []int) (err error) {
+	d.LearningAbilitiesInternal, err = MarshalOne[LearningAbilities](&LearningAbilities{Target: v})
 	return
 }
 
