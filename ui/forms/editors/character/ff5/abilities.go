@@ -1,6 +1,9 @@
 package ff5
 
 import (
+	"cmp"
+	"slices"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -71,19 +74,26 @@ func (e *Abilities) addRow(rows *fyne.Container, a *save.Ability, f finder.Find,
 }
 
 func (e *Abilities) createMagic(magics []models.NameValue) fyne.CanvasObject {
-	rows := container.NewVBox()
-	for _, magic := range magics {
+	left := container.NewVBox()
+	right := container.NewVBox()
+	slices.SortFunc(magics, func(i, j models.NameValue) int { return cmp.Compare(i.Name, j.Name) })
+	half := len(magics) / 2
+	for i, magic := range magics {
 		func(magic models.NameValue) {
-			i := widget.NewCheck(magic.Name, func(checked bool) {
+			j := widget.NewCheck(magic.Name, func(checked bool) {
 				e.toggleMagic(checked, &save.Ability{
 					AbilityID: magic.Value,
 				})
 			})
-			i.SetChecked(e.c.HasAbility(magic.Value))
-			rows.Add(i)
+			j.SetChecked(e.c.HasAbility(magic.Value))
+			if i < half {
+				left.Add(j)
+			} else {
+				right.Add(j)
+			}
 		}(magic)
 	}
-	return container.NewVScroll(rows)
+	return container.NewVScroll(container.NewHBox(left, right))
 }
 
 func (e *Abilities) addAbility(a *save.Ability) {
