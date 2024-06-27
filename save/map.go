@@ -17,9 +17,9 @@ type (
 		TimerData                      string             `json:"timerData"`
 		EncountEnable                  *bool              `json:"encountEnable,omitempty"`
 		ViewType                       *int               `json:"viewType,omitempty"`
-		OtherPartyDataListInternal     *[]*OtherPartyData `json:"otherPartyDataList,omitempty"`
+		OtherPartyDataList             *[]*OtherPartyData `json:"otherPartyDataList,omitempty"`
 		PartyPlayableCharacterCorpsId  *[]int             `json:"partyPlayableCharacterCorpsId,omitempty"`
-		FieldDefenseNpcEntityIDList    *[]any             `json:"fieldDefenseNpcEntityIdList,omitempty"`
+		FieldDefenseNpcEntityIDList    *[]any             `json:"fieldDefenseNpcEntityIDList,omitempty"`
 		BeastFieldEncountExchangeFlags *[]int             `json:"beastFieldEncountExchangeFlags,omitempty"`
 		BeastFieldEncountSeekGroupId   *int               `json:"beastFieldEncountSeekGroupId,omitempty"`
 		RtsData                        *any               `json:"rtsData,omitempty"`
@@ -37,10 +37,11 @@ type (
 		Direction int      `json:"direction"`
 	}
 	OtherPartyData struct {
-		MapID                    int    `json:"mapId"`
-		PointIn                  int    `json:"pointIn"`
-		PlayerEntityInternal     string `json:"playerEntity"`
-		PlayableCharacterCorpsId int    `json:"playableCharacterCorpsId"`
+		MapID                    int           `json:"mapId"`
+		PointIn                  int           `json:"pointIn"`
+		PlayerEntityInternal     string        `json:"playerEntity"`
+		PE                       *PlayerEntity `json:"-"`
+		PlayableCharacterCorpsId int           `json:"playableCharacterCorpsId"`
 	}
 )
 

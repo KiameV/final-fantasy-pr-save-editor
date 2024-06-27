@@ -14,6 +14,7 @@ type (
 		ImportantInventory *Inventory
 		Transportations    *Transportations
 		Map                *MapData
+		Misc               *Misc
 		Espers             []int
 		// Misc               *Misc
 		Data *save.Data
@@ -62,6 +63,7 @@ func NewSave(data *save.Data) (s *Save, err error) {
 	if s.Map, err = NewMapData(data.Game, md); err != nil {
 		return
 	}
+	s.Misc = NewMisc(data, ud, ds)
 	if data.Game.IsSix() {
 		if s.Espers, err = ud.OwnedMagicStones(); err != nil {
 			return
@@ -70,7 +72,7 @@ func NewSave(data *save.Data) (s *Save, err error) {
 	return s, err
 }
 
-func (s *Save) ToSave(slot int) (d *save.Data, err error) {
+func (s *Save) ToSave(game global.Game, slot int) (d *save.Data, err error) {
 	if err = s.preSave(); err != nil {
 		return
 	}
@@ -119,49 +121,52 @@ func (s *Save) ToSave(slot int) (d *save.Data, err error) {
 	if err = s.Transportations.ToSave(ds); err != nil {
 		return
 	}
-	if err = s.Map.ToSave(md); err != nil {
+	if err = s.Map.ToSave(game, md); err != nil {
 		return
 	}
+	s.Misc.ToSave(game, ud, ds)
 	if s.Game().IsSix() {
 		if err = ud.SetOwnedMagicStones(s.Espers); err != nil {
 			return
 		}
 	}
-	d, err = s.Data.Pack(slot, ud, md, ds)
+	if d, err = s.Data.Pack(slot, ud, md, ds); err == nil {
+		s.Misc.ToSaveData(d)
+	}
 	return
 }
 
 func (s *Save) preSave() (err error) {
 	game := s.Game()
 
-	inv := make(map[int]*save.OwnedItems)
-	for _, i := range s.Inventory.Rows {
-		inv[i.ContentID] = i
-	}
-	eq := make(map[int][]*save.Equipment)
-	for _, c := range s.Characters.All() {
-		for _, e := range c.Equipment.Values {
-			sl, _ := eq[e.ContentID]
-			sl = append(sl, e)
-			eq[e.ContentID] = sl
-		}
-	}
-	for k, v := range eq {
-		needed := len(v)
-		row, ok := inv[k]
-		if ok {
-			if row.Count < needed {
-				row.Count = needed
-			}
-		} else {
-			row = &save.OwnedItems{ContentID: k, Count: needed}
-			inv[k] = row
-			s.Inventory.Add(row)
-		}
-		for _, e := range v {
-			e.Count = row.Count
-		}
-	}
+	// inv := make(map[int]*save.OwnedItems)
+	// for _, i := range s.Inventory.Rows {
+	// 	inv[i.ContentID] = i
+	// }
+	// eq := make(map[int][]*save.Equipment)
+	// for _, c := range s.Characters.All() {
+	// 	for _, e := range c.Equipment.Values {
+	// 		sl, _ := eq[e.ContentID]
+	// 		sl = append(sl, e)
+	// 		eq[e.ContentID] = sl
+	// 	}
+	// }
+	// for k, v := range eq {
+	// 	needed := len(v)
+	// 	row, ok := inv[k]
+	// 	if ok {
+	// 		if row.Count < needed {
+	// 			row.Count = needed
+	// 		}
+	// 	} else {
+	// 		row = &save.OwnedItems{ContentID: k, Count: needed}
+	// 		inv[k] = row
+	// 		s.Inventory.Add(row)
+	// 	}
+	// 	for _, e := range v {
+	// 		e.Count = row.Count
+	// 	}
+	// }
 	for _, c := range s.Characters.All() {
 		if !c.Base.IsEnableCorps {
 			continue
@@ -259,7 +264,9 @@ func (s *Save) preCharacterSaveFF5(c *Character) (err error) {
 func (s *Save) preCharacterSaveFF6(c *Character) (err error) {
 	for _, a := range c.Abilities {
 		if a.ContentID == 0 && a.AbilityID > 0 {
-			// TODO
+			if a.ContentID == 0 && a.AbilityID > 0 {
+				a.ContentID = a.AbilityID + 330
+			}
 		}
 	}
 	return

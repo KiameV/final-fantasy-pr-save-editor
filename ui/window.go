@@ -193,7 +193,7 @@ func (g *gui) Save() {
 			}()
 			// Save file
 			config.SetSaveDir(game, dir)
-			d, err := g.data.ToSave(slot)
+			d, err := g.data.ToSave(game, slot)
 			if err == nil {
 				err = file.SaveSave(game, d, slot, filepath.Join(dir, f))
 			}

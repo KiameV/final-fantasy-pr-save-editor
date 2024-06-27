@@ -199,12 +199,16 @@ func (d *OwnedTransportation) SetPosition(v *Position) (err error) {
 	return
 }
 
-func (d *UserData) OwnedCrystalFlags() (v *OwnedCrystalFlags, err error) {
-	return UnmarshalOne[OwnedCrystalFlags](d.OwnedCrystalFlagsInternal)
+func (d *UserData) OwnedCrystalFlags() (v []bool, err error) {
+	var l *OwnedCrystalFlags
+	if l, err = UnmarshalOne[OwnedCrystalFlags](d.OwnedCrystalFlagsInternal); err == nil {
+		v = l.Target
+	}
+	return
 }
 
-func (d *UserData) SetOwnedCrystalFlags(v *OwnedCrystalFlags) (err error) {
-	d.OwnedCrystalFlagsInternal, err = MarshalOne[OwnedCrystalFlags](v)
+func (d *UserData) SetOwnedCrystalFlags(v []bool) (err error) {
+	d.OwnedCrystalFlagsInternal, err = MarshalOne[OwnedCrystalFlags](&OwnedCrystalFlags{Target: v})
 	return
 }
 
