@@ -20,3 +20,10 @@ func NewMapData(game global.Game, md *save.MapData) (m *MapData, err error) {
 	}
 	return
 }
+
+func (d MapData) ToSave(md *save.MapData) (err error) {
+	if err = md.SetGpsData(d.Gps); err == nil {
+		err = md.SetPlayerEntity(d.Player)
+	}
+	return
+}

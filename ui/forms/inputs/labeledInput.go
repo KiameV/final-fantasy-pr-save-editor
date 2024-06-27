@@ -31,6 +31,7 @@ type (
 		fyne.CanvasObject
 		Enable()
 		Disable()
+		SetText(string)
 	}
 )
 

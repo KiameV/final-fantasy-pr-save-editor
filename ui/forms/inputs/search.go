@@ -14,6 +14,7 @@ import (
 	"pixel-remastered-save-editor/models/core/costs/ff3"
 	"pixel-remastered-save-editor/models/core/costs/ff4"
 	"pixel-remastered-save-editor/models/core/costs/ff5"
+	"pixel-remastered-save-editor/models/core/costs/ff6"
 	"pixel-remastered-save-editor/models/finder"
 )
 
@@ -90,7 +91,13 @@ func Load(game global.Game) {
 		_s.Jobs = NewSearch(ff5.Jobs)
 		_s.Maps = NewSearch(ff5.Maps)
 	} else { // Six
-
+		_s.Abilities = NewSearch(ff6.Blitzes, ff6.Bushidos, ff6.Dances, ff6.Lores, ff6.Rages, ff6.Magic)
+		_s.Commands = NewSearch(ff6.Commands)
+		_s.Equipment = NewSearch(ff6.Weapons, ff6.Shields, ff6.Armors, ff6.Helmets, ff6.Hands)
+		_s.Items = NewSearch(ff6.Items)
+		_s.ItemsEquipment = NewSearch(ff6.Items, ff6.Weapons, ff6.Shields, ff6.Armors, ff6.Helmets, ff6.Hands)
+		_s.Jobs = NewSearch(ff6.Jobs)
+		_s.Maps = NewSearch(ff6.Maps)
 	}
 }
 

@@ -1,16 +1,14 @@
 package ff6
 
 import (
+	"cmp"
+	"slices"
+
 	"pixel-remastered-save-editor/models"
 )
 
-const (
-	SpellFrom int64 = 31
-	SpellTo   int64 = 84
-)
-
 var (
-	Spells = []models.NameValue{
+	Magic = []models.NameValue{
 		models.NewValueName(31, "Cure"),
 		models.NewValueName(32, "Cura"),
 		models.NewValueName(33, "Curaga"),
@@ -66,4 +64,13 @@ var (
 		models.NewValueName(83, "Quick"),
 		models.NewValueName(84, "Dispel"),
 	}
+	MagicSorted []models.NameValue
 )
+
+func init() {
+	MagicSorted = make([]models.NameValue, len(Magic))
+	copy(MagicSorted, Magic)
+	slices.SortFunc(MagicSorted, func(i, j models.NameValue) int {
+		return cmp.Compare(i.Name, j.Name)
+	})
+}

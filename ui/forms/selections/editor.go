@@ -30,11 +30,14 @@ func NewEditor(game global.Game, save *core.Save) *Editor {
 }
 
 func (s *Editor) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(
-		container.NewAppTabs(
-			container.NewTabItem("Characters", NewCharacters(s.game, s.save)),
-			container.NewTabItem("Inventory", NewInventory(s.save)),
-			container.NewTabItem("Party", editors.NewCoreParty(s.save.Party, s.save.Parties)),
-			container.NewTabItem("Map Data", mapData.NewCore(s.save.Map)),
-		))
+	tabs := container.NewAppTabs(
+		container.NewTabItem("Characters", NewCharacters(s.save)),
+		container.NewTabItem("Inventory", NewInventory(s.save)),
+		container.NewTabItem("Party", editors.NewCoreParty(s.save.Party, s.save.Parties)),
+		container.NewTabItem("Map Data", mapData.NewCore(s.save.Map)),
+	)
+	if s.game.IsSix() {
+		tabs.Append(container.NewTabItem("Espers", editors.NewEspers(s.save)))
+	}
+	return widget.NewSimpleRenderer(tabs)
 }

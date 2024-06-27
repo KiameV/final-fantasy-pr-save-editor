@@ -159,6 +159,11 @@ func (c *Character) HasAbility(id int) bool {
 	return ok
 }
 
+func (c *Character) GetAbility(id int) (a *save.Ability, ok bool) {
+	a, ok = c.abilitiesLookup[id]
+	return
+}
+
 func (c *Character) ToSave() (s string, err error) {
 	if err = c.Base.SetCharacterParameters(c.Parameters); err != nil {
 		return

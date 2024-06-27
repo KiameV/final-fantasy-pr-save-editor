@@ -76,7 +76,7 @@ type (
 		Target []int `json:"target"`
 	}
 	OwnedMagicStoneList struct {
-		Target []any `json:"target"`
+		Target []int `json:"target"`
 	}
 	CheatSettingsData struct {
 		IsEnableEncounters           bool    `json:"isEnableEncount"`
@@ -244,11 +244,15 @@ func (d *UserData) SetLearnedAbilityList(v *LearnedAbilityList) (err error) {
 	return
 }
 
-func (d *UserData) OwnedMagicStoneList() (v *OwnedMagicStoneList, err error) {
-	return UnmarshalOne[OwnedMagicStoneList](d.OwnedMagicStoneListInternal)
+func (d *UserData) OwnedMagicStones() (v []int, err error) {
+	var l *OwnedMagicStoneList
+	if l, err = UnmarshalOne[OwnedMagicStoneList](d.OwnedMagicStoneListInternal); err == nil {
+		v = l.Target
+	}
+	return
 }
 
-func (d *UserData) SetOwnedMagicStoneList(v *OwnedMagicStoneList) (err error) {
-	d.OwnedMagicStoneListInternal, err = MarshalOne[OwnedMagicStoneList](v)
+func (d *UserData) SetOwnedMagicStones(v []int) (err error) {
+	d.OwnedMagicStoneListInternal, err = MarshalOne[OwnedMagicStoneList](&OwnedMagicStoneList{Target: v})
 	return
 }

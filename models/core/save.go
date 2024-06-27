@@ -14,6 +14,7 @@ type (
 		ImportantInventory *Inventory
 		Transportations    *Transportations
 		Map                *MapData
+		Espers             []int
 		// Misc               *Misc
 		Data *save.Data
 	}
@@ -60,6 +61,11 @@ func NewSave(data *save.Data) (s *Save, err error) {
 	}
 	if s.Map, err = NewMapData(data.Game, md); err != nil {
 		return
+	}
+	if data.Game.IsSix() {
+		if s.Espers, err = ud.OwnedMagicStones(); err != nil {
+			return
+		}
 	}
 	return s, err
 }
@@ -109,6 +115,17 @@ func (s *Save) ToSave(slot int) (d *save.Data, err error) {
 	}
 	if err = ud.SetImportantOwnedItems(oi); err != nil {
 		return
+	}
+	if err = s.Transportations.ToSave(ds); err != nil {
+		return
+	}
+	if err = s.Map.ToSave(md); err != nil {
+		return
+	}
+	if s.Game().IsSix() {
+		if err = ud.SetOwnedMagicStones(s.Espers); err != nil {
+			return
+		}
 	}
 	d, err = s.Data.Pack(slot, ud, md, ds)
 	return

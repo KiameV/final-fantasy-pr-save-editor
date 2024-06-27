@@ -88,14 +88,13 @@ func Load(game global.Game, characters []*core.Character) {
 			maps:      nameLookup(ff5.Maps),
 		}
 	} else { // Six
-		var temp []models.NameValue
 		singletonFinder = &finders{
-			abilities: nameLookup(ff6.Blitzes, ff6.Dances, ff6.Lores, ff6.Bushidos, ff6.Rages),
-			commands:  nameLookup(temp),
-			important: nameLookup(temp),
-			items:     ff6.ItemsByID,
+			abilities: nameLookup(ff6.Blitzes, ff6.Dances, ff6.Lores, ff6.Bushidos, ff6.Rages, ff6.Magic),
+			commands:  nameLookup(ff6.Commands),
+			important: nameLookup(ff6.ImportantItems),
+			items:     nameLookup(ff6.Items, ff6.Weapons, ff6.Shields, ff6.Armors, ff6.Helmets, ff6.Hands),
 			jobs:      nameLookup(ff6.Jobs),
-			maps:      nameLookup(temp),
+			maps:      nameLookup(ff6.Maps),
 		}
 	}
 	singletonFinder.characters = make(map[int]string)

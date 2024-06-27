@@ -33,3 +33,8 @@ func NewTransportations(game global.Game, ds *save.DataStorage) (t *Transportati
 func (t *Transportations) Add(index int, form *Transportation) {
 	t.Forms[index] = form
 }
+
+func (t *Transportations) ToSave(ds *save.DataStorage) error {
+	// TODO
+	return nil
+}

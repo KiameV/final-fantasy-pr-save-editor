@@ -4,19 +4,6 @@ import (
 	"pixel-remastered-save-editor/models"
 )
 
-const (
-	BlitzFrom   int64 = 132
-	BlitzTo     int64 = 139
-	BushidoFrom int64 = 124
-	BushidoTo   int64 = 131
-	DanceFrom   int64 = 164
-	DanceTo     int64 = 171
-	LoreFrom    int64 = 140
-	LoreTo      int64 = 163
-	RageFrom    int64 = 800
-	RageTo      int64 = 1055
-)
-
 var (
 	Blitzes = []models.NameValue{
 		models.NewNameValue("Raging Fist", 132),

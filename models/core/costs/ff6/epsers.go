@@ -1,6 +1,9 @@
 package ff6
 
 import (
+	"cmp"
+	"slices"
+
 	"pixel-remastered-save-editor/models"
 )
 
@@ -34,4 +37,13 @@ var (
 		models.NewNameValue("Crusader", 87),
 		models.NewNameValue("Raiden", 88),
 	}
+	EspersSorted []models.NameValue
 )
+
+func init() {
+	EspersSorted = make([]models.NameValue, len(Espers))
+	copy(EspersSorted, Espers)
+	slices.SortFunc(EspersSorted, func(i, j models.NameValue) int {
+		return cmp.Compare(i.Name, j.Name)
+	})
+}
