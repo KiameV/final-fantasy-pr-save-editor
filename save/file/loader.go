@@ -60,6 +60,8 @@ func loadFile(game global.Game, fromFile string) (out []byte, trimmed []byte, er
 	zr := flate.NewReader(bytes.NewReader(b))
 	defer func() { _ = zr.Close() }()
 	out, err = io.ReadAll(zr)
-	printFile(filepath.Join(config.Dir(game), "_loaded.json"), out)
+	if err == nil {
+		printFile(filepath.Join(config.Dir(game), "_loaded.json"), out)
+	}
 	return
 }

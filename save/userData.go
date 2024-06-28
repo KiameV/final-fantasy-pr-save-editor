@@ -53,12 +53,12 @@ type (
 		Target []string `json:"target"`
 	}
 	OwnedTransportation struct {
-		PositionInternal string `json:"position"`
-		Direction        int    `json:"direction"`
-		ID               int    `json:"id"`
-		MapID            int    `json:"mapId"`
-		Enable           bool   `json:"enable"`
-		TimeStampTicks   int    `json:"timeStampTicks"`
+		Position       *Position `json:"position"`
+		Direction      int       `json:"direction"`
+		ID             int       `json:"id"`
+		MapID          int       `json:"mapId"`
+		Enabled        bool      `json:"enable"`
+		TimeStampTicks int       `json:"timeStampTicks"`
 	}
 	OwnedCrystalFlags struct {
 		Target []bool `json:"target"`
@@ -172,30 +172,19 @@ func (d *UserData) SetNormalOwnedItemSortIDList(v []int) (err error) {
 	return
 }
 
-func (d *UserData) OwnedTransportationList() (v *OwnedTransportationList, err error) {
-	return UnmarshalOne[OwnedTransportationList](d.OwnedTransportationListInternal)
-}
-
-func (d *UserData) SetOwnedTransportationList(v *OwnedTransportationList) (err error) {
-	d.OwnedTransportationListInternal, err = MarshalOne[OwnedTransportationList](v)
+func (d *UserData) OwnedTransportationList() (v []*OwnedTransportation, err error) {
+	var l *OwnedTransportationList
+	if l, err = UnmarshalOne[OwnedTransportationList](d.OwnedTransportationListInternal); err == nil {
+		v, err = UnmarshalMany[OwnedTransportation](l.Target)
+	}
 	return
 }
 
-func (d *OwnedTransportationList) OwnedTransportation() (v []*OwnedTransportation, err error) {
-	return UnmarshalMany[OwnedTransportation](d.Target)
-}
-
-func (d *OwnedTransportationList) SetOwnedTransportation(v []*OwnedTransportation) (err error) {
-	d.Target, err = MarshalMany[OwnedTransportation](v)
-	return
-}
-
-func (d *OwnedTransportation) Position() (v *Position, err error) {
-	return UnmarshalOne[Position](d.PositionInternal)
-}
-
-func (d *OwnedTransportation) SetPosition(v *Position) (err error) {
-	d.PositionInternal, err = MarshalOne[Position](v)
+func (d *UserData) SetOwnedTransportationList(v []*OwnedTransportation) (err error) {
+	var t []string
+	if t, err = MarshalMany(v); err == nil {
+		d.OwnedTransportationListInternal, err = MarshalOne[OwnedTransportationList](&OwnedTransportationList{Target: t})
+	}
 	return
 }
 

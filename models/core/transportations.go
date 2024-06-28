@@ -7,34 +7,16 @@ import (
 
 type (
 	Transportations struct {
-		Forms []*Transportation
-	}
-	Transportation struct {
-		ID             int
-		Enabled        bool
-		ForcedEnabled  bool
-		ForcedDisabled bool
-		MapID          int
-		Position       *save.Position
-		Direction      int
-		TimeStampTicks uint64
+		Transportations []*save.OwnedTransportation
 	}
 )
 
-func NewTransportations(game global.Game, ds *save.DataStorage) (t *Transportations, err error) {
-	// TODO
-	return &Transportations{
-		Forms: []*Transportation{
-			{},
-		},
-	}, nil
+func NewTransportations(game global.Game, ud *save.UserData) (t *Transportations, err error) {
+	t = &Transportations{}
+	t.Transportations, err = ud.OwnedTransportationList()
+	return
 }
 
-func (t *Transportations) Add(index int, form *Transportation) {
-	t.Forms[index] = form
-}
-
-func (t *Transportations) ToSave(ds *save.DataStorage) error {
-	// TODO
-	return nil
+func (t *Transportations) ToSave(ud *save.UserData) error {
+	return ud.SetOwnedTransportationList(t.Transportations)
 }

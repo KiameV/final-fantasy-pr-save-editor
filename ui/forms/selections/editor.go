@@ -35,6 +35,7 @@ func (s *Editor) CreateRenderer() fyne.WidgetRenderer {
 		container.NewTabItem("Inventory", NewInventory(s.save)),
 		container.NewTabItem("Party", editors.NewCoreParty(s.save.Party, s.save.Parties)),
 		container.NewTabItem("Map Data", mapData.NewCore(s.save.Map)),
+		container.NewTabItem("Transportation", editors.NewCoreTransportation(s.game, s.save.Transportations)),
 		container.NewTabItem("Misc", NewMisc(s.save.Misc)),
 	)
 	if s.game.IsSix() {

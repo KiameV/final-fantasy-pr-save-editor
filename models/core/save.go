@@ -57,7 +57,7 @@ func NewSave(data *save.Data) (s *Save, err error) {
 		return
 	}
 	s.ImportantInventory = NewInventory(data.Game, oi, nil)
-	if s.Transportations, err = NewTransportations(data.Game, ds); err != nil {
+	if s.Transportations, err = NewTransportations(data.Game, ud); err != nil {
 		return
 	}
 	if s.Map, err = NewMapData(data.Game, md); err != nil {
@@ -118,7 +118,7 @@ func (s *Save) ToSave(game global.Game, slot int) (d *save.Data, err error) {
 	if err = ud.SetImportantOwnedItems(oi); err != nil {
 		return
 	}
-	if err = s.Transportations.ToSave(ds); err != nil {
+	if err = s.Transportations.ToSave(ud); err != nil {
 		return
 	}
 	if err = s.Map.ToSave(game, md); err != nil {
