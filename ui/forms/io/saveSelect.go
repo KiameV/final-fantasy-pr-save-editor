@@ -1,6 +1,7 @@
 package io
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 
@@ -14,6 +15,12 @@ import (
 
 const (
 	quickSave = "Quick Save"
+	one       = "FINAL FANTASY PR"
+	two       = "FINAL FANTASY II PR"
+	three     = "FINAL FANTASY III PR"
+	four      = "FINAL FANTASY IV PR"
+	five      = "FINAL FANTASY V PR"
+	six       = "FINAL FANTASY VI PR"
 )
 
 type (
@@ -37,6 +44,30 @@ const (
 )
 
 func NewFileIO(kind Kind, game global.Game, window fyne.Window, dir string, onSelected OnSelect, onCancel func()) *saveSelect {
+	if _, err := os.Stat(dir); err != nil {
+		dir = "."
+	}
+	if dir == "" || dir == "." {
+		switch game {
+		case global.One:
+			dir = one
+		case global.Two:
+			dir = two
+		case global.Three:
+			dir = three
+		case global.Four:
+			dir = four
+		case global.Five:
+			dir = five
+		default: // six
+			dir = six
+		}
+
+		dir = fmt.Sprintf("%s/Documents/My Games/%s/Steam/76561197971028520", os.Getenv("USERPROFILE"), dir)
+		if _, err := os.Stat(dir); err != nil {
+			dir = "."
+		}
+	}
 	w := &saveSelect{
 		kind:       kind,
 		game:       game,
