@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	autoSave  = "Auto Save"
 	quickSave = "Quick Save"
 	one       = "FINAL FANTASY PR"
 	two       = "FINAL FANTASY II PR"
@@ -147,8 +148,13 @@ var (
 	}{
 		{
 			UUID: "7nCxyzTwG31W3Zlg70mo751W8ETH1n+Km0dWOzRU84Y=",
-			Name: quickSave,
+			Name: autoSave,
 			Slot: 21,
+		},
+		{
+			UUID: "Rl18osV3e9kPX9SMWQj8mqShFpTUmu1lf6Mb=FVVfqk=",
+			Name: quickSave,
+			Slot: 22,
 		},
 		{
 			UUID: "ookrbATYovG3tEOXIH4HqWnsv8TrUlRWzM8AlCmW2mk=",
