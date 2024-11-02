@@ -141,11 +141,11 @@ func (g *gui) Load() {
 func (g *gui) gameSelected(game global.Game) {
 	g.prev = g.canvas.Objects[0]
 	g.canvas.RemoveAll()
-	g.canvas.Add(io.NewFileIO(io.Load, game, g.window, config.Dir(game), func(game global.Game, name, dir, f string, slot int) {
+	g.canvas.Add(io.NewFileIO(io.Load, game, g.window, config.Dir(game), func(game global.Game, name, dir, f string, slot int, saveType global.SaveFileType) {
 		defer func() { g.open.Disabled = false }()
 		// Load file
 		config.SetSaveDir(game, dir)
-		if data, err := file.LoadSave(game, filepath.Join(dir, f)); err != nil {
+		if data, err := file.LoadSave(game, filepath.Join(dir, f), saveType); err != nil {
 			if g.prev != nil {
 				g.canvas.RemoveAll()
 				g.canvas.Add(g.prev)
@@ -186,7 +186,7 @@ func (g *gui) Save() {
 	g.save.Disabled = true
 	g.canvas.RemoveAll()
 	g.canvas.Add(
-		io.NewFileIO(io.Save, g.data.Data.Game, g.window, config.Dir(g.data.Data.Game), func(game global.Game, name, dir, f string, slot int) {
+		io.NewFileIO(io.Save, g.data.Data.Game, g.window, config.Dir(g.data.Data.Game), func(game global.Game, name, dir, f string, slot int, saveType global.SaveFileType) {
 			defer func() {
 				g.open.Disabled = false
 				g.save.Disabled = false
@@ -195,7 +195,7 @@ func (g *gui) Save() {
 			config.SetSaveDir(game, dir)
 			d, err := g.data.ToSave(game, slot)
 			if err == nil {
-				err = file.SaveSave(game, d, slot, filepath.Join(dir, f))
+				err = file.SaveSave(game, d, slot, filepath.Join(dir, f), saveType)
 			}
 			if err != nil {
 				if g.prev != nil {

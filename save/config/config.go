@@ -13,12 +13,13 @@ const file = "prSaveEditor.config"
 var config ConfigData
 
 type ConfigData struct {
-	SaveDir1 string `json:"dir1"`
-	SaveDir2 string `json:"dir2"`
-	SaveDir3 string `json:"dir3"`
-	SaveDir4 string `json:"dir4"`
-	SaveDir5 string `json:"dir5"`
-	SaveDir6 string `json:"dir6"`
+	SaveDir1          string `json:"dir1"`
+	SaveDir2          string `json:"dir2"`
+	SaveDir3          string `json:"dir3"`
+	SaveDir4          string `json:"dir4"`
+	SaveDir5          string `json:"dir5"`
+	SaveDir6          string `json:"dir6"`
+	EnablePlayStation bool   `json:"ps"`
 }
 
 func init() {
@@ -73,5 +74,12 @@ func SetSaveDir(saveType global.Game, dir string) {
 	default: // global.Six
 		config.SaveDir6 = dir
 	}
+	saveConfig()
+}
+
+func EnablePlayStation() bool { return config.EnablePlayStation }
+
+func SetEnablePlayStation(v bool) {
+	config.EnablePlayStation = v
 	saveConfig()
 }

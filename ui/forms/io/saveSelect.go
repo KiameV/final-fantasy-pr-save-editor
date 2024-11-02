@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/sqweek/dialog"
 	"pixel-remastered-save-editor/global"
+	"pixel-remastered-save-editor/save/config"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 )
 
 type (
-	OnSelect   func(game global.Game, name, dir, file string, slot int)
+	OnSelect   func(game global.Game, name, dir, file string, slot int, saveType global.SaveFileType)
 	saveSelect struct {
 		widget.BaseWidget
 		game       global.Game
@@ -35,6 +36,7 @@ type (
 		buttons    *fyne.Container
 		onSelected OnSelect
 		onCancel   func()
+		saveType   *widget.Select
 	}
 	Kind bool
 )
@@ -80,6 +82,16 @@ func NewFileIO(kind Kind, game global.Game, window fyne.Window, dir string, onSe
 	}
 	w.ExtendBaseWidget(w)
 	w.dir.AddListener(w)
+	w.saveType = widget.NewSelect([]string{"PC", "Playstation"}, func(s string) {
+		config.SetEnablePlayStation(s == "Playstation")
+		w.DataChanged()
+	})
+	if config.EnablePlayStation() {
+		w.saveType.SetSelected("Playstation")
+	} else {
+		w.saveType.SetSelected("PC")
+	}
+
 	return w
 }
 
@@ -90,10 +102,15 @@ func (w *saveSelect) DataChanged() {
 		m        = make(map[string]fs.FileInfo)
 		fi       fs.FileInfo
 		found    bool
+		saveType = global.PC
 	)
 	if err != nil {
 		return
 	}
+	if config.EnablePlayStation() {
+		saveType = global.PS
+	}
+
 	if d, err = os.ReadDir(dir); err == nil {
 		for _, f := range d {
 			if !f.IsDir() {
@@ -104,22 +121,24 @@ func (w *saveSelect) DataChanged() {
 		}
 	}
 	if len(m) > 0 {
-		var changed bool
+		var key string
+		w.buttons.RemoveAll()
 		for _, save := range saves {
-			if _, found = m[save.UUID]; found || w.kind == Save {
-				if !changed {
-					changed = true
-					w.buttons.RemoveAll()
-				}
+			if saveType == global.PS {
+				key = fmt.Sprintf("slot%d.sav", save.Slot)
+			} else {
+				key = save.UUID
+			}
+			if _, found = m[key]; found || w.kind == Save {
 				name := save.Name
 				if found && w.kind == Save {
 					name += " (replace)"
 				}
-				func(name string, uuid string, slot int) {
+				func(name string, key string, slot int) {
 					w.buttons.Add(widget.NewButton(name, func() {
-						w.onSelected(w.game, name, dir, uuid, slot)
+						w.onSelected(w.game, name, dir, key, slot, saveType)
 					}))
-				}(name, save.UUID, save.Slot)
+				}(name, key, save.Slot)
 			}
 		}
 	}
@@ -134,6 +153,7 @@ func (w *saveSelect) CreateRenderer() fyne.WidgetRenderer {
 			}
 		}),
 		widget.NewEntryWithData(w.dir))
+	top = container.NewBorder(top, nil, widget.NewLabel("Save Type:"), nil, w.saveType)
 	bottom := widget.NewButton("Cancel", func() {
 		w.onCancel()
 	})

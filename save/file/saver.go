@@ -16,7 +16,7 @@ import (
 	"pixel-remastered-save-editor/save/config"
 )
 
-func SaveSave(game global.Game, data *save.Data, slot int, fileName string) (err error) {
+func SaveSave(game global.Game, data *save.Data, slot int, fileName string, saveType global.SaveFileType) (err error) {
 	var (
 		toFile = filepath.Join(config.Dir(data.Game), fileName)
 		temp   = filepath.Join(global.PWD, "temp")
@@ -34,40 +34,42 @@ func SaveSave(game global.Game, data *save.Data, slot int, fileName string) (err
 	}
 	defer func() { _ = os.Remove(temp) }()
 
-	return saveFile(game, out, fileName, data.Trimmed)
+	return saveFile(game, out, fileName, data.Trimmed, saveType)
 }
 
-func saveFile(game global.Game, data []byte, toFile string, trimmed []byte) (err error) {
+func saveFile(game global.Game, data []byte, toFile string, trimmed []byte, saveType global.SaveFileType) (err error) {
 	var (
 		b  bytes.Buffer
 		zw *flate.Writer
 	)
 	printFile(filepath.Join(config.Dir(game), "_save.json"), data)
-	// Flate
-	if zw, err = flate.NewWriter(&b, 6); err != nil {
-		return
-	}
-	if _, err = zw.Write(data); err != nil {
-		return
-	}
-	_ = zw.Flush()
-	_ = zw.Close()
+	if saveType == global.PC {
+		// Flate
+		if zw, err = flate.NewWriter(&b, 6); err != nil {
+			return
+		}
+		if _, err = zw.Write(data); err != nil {
+			return
+		}
+		_ = zw.Flush()
+		_ = zw.Close()
 
-	// Encrypt
-	if data, err = rijndael.New().Encrypt(b.Bytes()); err != nil {
-		return
-	}
+		// Encrypt
+		if data, err = rijndael.New().Encrypt(b.Bytes()); err != nil {
+			return
+		}
 
-	// Encode
-	s := base64.StdEncoding.EncodeToString(data)
+		// Encode
+		s := base64.StdEncoding.EncodeToString(data)
 
-	// Format
-	if len(trimmed) > 0 {
-		data = make([]byte, 0, len(trimmed)+len(s))
-		data = append(data, trimmed...)
-		data = append(data, []byte(s)...)
-	} else {
-		data = []byte(s)
+		// Format
+		if len(trimmed) > 0 {
+			data = make([]byte, 0, len(trimmed)+len(s))
+			data = append(data, trimmed...)
+			data = append(data, []byte(s)...)
+		} else {
+			data = []byte(s)
+		}
 	}
 
 	// Write to file

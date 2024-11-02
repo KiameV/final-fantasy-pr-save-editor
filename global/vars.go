@@ -11,7 +11,8 @@ const (
 )
 
 type (
-	Game byte
+	Game         byte
+	SaveFileType byte
 )
 
 const (
@@ -22,6 +23,11 @@ const (
 	Four
 	Five
 	Six
+)
+
+const (
+	PC SaveFileType = iota
+	PS
 )
 
 func (g Game) IsOne() bool   { return g == One }

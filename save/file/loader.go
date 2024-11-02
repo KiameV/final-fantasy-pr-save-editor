@@ -16,22 +16,25 @@ import (
 	"pixel-remastered-save-editor/save/config"
 )
 
-func LoadSave(game global.Game, fileName string) (data *save.Data, err error) {
+func LoadSave(game global.Game, fileName string, saveType global.SaveFileType) (data *save.Data, err error) {
 	var b []byte
 	data = save.New(game)
-	if b, data.Trimmed, err = loadFile(game, fileName); err != nil {
+	if b, data.Trimmed, err = loadFile(game, fileName, saveType); err != nil {
 		return
 	}
 	err = oj.Unmarshal(b, data)
 	return
 }
 
-func loadFile(game global.Game, fromFile string) (out []byte, trimmed []byte, err error) {
+func loadFile(game global.Game, fromFile string, saveType global.SaveFileType) (out []byte, trimmed []byte, err error) {
 	var (
 		b []byte
 	)
 	if b, err = os.ReadFile(fromFile); err != nil {
 		return
+	}
+	if saveType == global.PS {
+		return b, nil, nil
 	}
 	if len(b) < 10 {
 		err = errors.New("unable to load file")
