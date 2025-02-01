@@ -5,13 +5,16 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2/dialog"
+	d "github.com/tawesoft/golib/v2/dialog"
 	"pixel-remastered-save-editor/browser"
 	"pixel-remastered-save-editor/ui"
 )
 
 func main() {
 	defer func() {
-		_ = recover()
+		if err := recover(); err != nil {
+			_ = d.Raise(fmt.Sprintf("crashed due to: %v", err))
+		}
 	}()
 	gui := ui.New()
 	gui.Load()

@@ -14,6 +14,7 @@ type (
 		ImportantInventory *Inventory
 		Transportations    *Transportations
 		Map                *MapData
+		Bestiary           *Bestiary
 		Misc               *Misc
 		Espers             []int
 		// Misc               *Misc
@@ -27,11 +28,12 @@ func NewSave(data *save.Data) (s *Save, err error) {
 		md *save.MapData
 		ds *save.DataStorage
 		cl *save.OwnedCharacterList
+		b  *save.Bestiary
 		oi []*save.OwnedItems
 		so []int
 	)
 	s = &Save{Data: data}
-	if ud, md, ds, err = data.Unpack(); err != nil {
+	if ud, md, ds, b, err = data.Unpack(); err != nil {
 		return
 	}
 	if cl, err = ud.OwnedCharacterList(); err != nil {
@@ -63,6 +65,12 @@ func NewSave(data *save.Data) (s *Save, err error) {
 	if s.Map, err = NewMapData(data.Game, md); err != nil {
 		return
 	}
+	if b != nil {
+		if s.Bestiary, err = NewBestiary(data.Game, b); err != nil {
+			s.Bestiary = nil
+			err = nil
+		}
+	}
 	s.Misc = NewMisc(data, ud, ds)
 	if data.Game.IsSix() {
 		if s.Espers, err = ud.OwnedMagicStones(); err != nil {
@@ -81,11 +89,12 @@ func (s *Save) ToSave(game global.Game, slot int) (d *save.Data, err error) {
 		md  *save.MapData
 		ds  *save.DataStorage
 		all = s.Characters.All()
+		b   *save.Bestiary
 		cl  = &save.OwnedCharacterList{Target: make([]string, len(all))}
 		oi  []*save.OwnedItems
 		so  []int
 	)
-	if ud, md, ds, err = s.Data.Unpack(); err != nil {
+	if ud, md, ds, b, err = s.Data.Unpack(); err != nil {
 		return
 	}
 
@@ -124,13 +133,16 @@ func (s *Save) ToSave(game global.Game, slot int) (d *save.Data, err error) {
 	if err = s.Map.ToSave(game, md); err != nil {
 		return
 	}
+	if s.Bestiary != nil {
+		b, _ = s.Bestiary.ToSave()
+	}
 	s.Misc.ToSave(game, ud, ds)
 	if s.Game().IsSix() {
 		if err = ud.SetOwnedMagicStones(s.Espers); err != nil {
 			return
 		}
 	}
-	if d, err = s.Data.Pack(slot, ud, md, ds); err == nil {
+	if d, err = s.Data.Pack(slot, ud, md, ds, b); err == nil {
 		s.Misc.ToSaveData(d)
 	}
 	return
@@ -139,34 +151,6 @@ func (s *Save) ToSave(game global.Game, slot int) (d *save.Data, err error) {
 func (s *Save) preSave() (err error) {
 	game := s.Game()
 
-	// inv := make(map[int]*save.OwnedItems)
-	// for _, i := range s.Inventory.Rows {
-	// 	inv[i.ContentID] = i
-	// }
-	// eq := make(map[int][]*save.Equipment)
-	// for _, c := range s.Characters.All() {
-	// 	for _, e := range c.Equipment.Values {
-	// 		sl, _ := eq[e.ContentID]
-	// 		sl = append(sl, e)
-	// 		eq[e.ContentID] = sl
-	// 	}
-	// }
-	// for k, v := range eq {
-	// 	needed := len(v)
-	// 	row, ok := inv[k]
-	// 	if ok {
-	// 		if row.Count < needed {
-	// 			row.Count = needed
-	// 		}
-	// 	} else {
-	// 		row = &save.OwnedItems{ContentID: k, Count: needed}
-	// 		inv[k] = row
-	// 		s.Inventory.Add(row)
-	// 	}
-	// 	for _, e := range v {
-	// 		e.Count = row.Count
-	// 	}
-	// }
 	for _, c := range s.Characters.All() {
 		if !c.Base.IsEnableCorps {
 			continue

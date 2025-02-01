@@ -84,7 +84,7 @@ func NewFileIO(kind Kind, game global.Game, window fyne.Window, dir string, onSe
 	w.dir.AddListener(w)
 	w.saveType = widget.NewSelect([]string{"PC", "Playstation"}, func(s string) {
 		config.SetEnablePlayStation(s == "Playstation")
-		w.DataChanged()
+		// w.DataChanged()
 	})
 	if config.EnablePlayStation() {
 		w.saveType.SetSelected("Playstation")

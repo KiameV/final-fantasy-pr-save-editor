@@ -29,8 +29,10 @@ type (
 		ItemsEquipment *Search
 		Jobs           *Search
 		Maps           *Search
+		Bestiary       *Search
 	}
 	Search struct {
+		Entries *[]models.NameValue
 		Text    *widget.TextGrid
 		Input   *widget.Entry
 		Results *widget.TextGrid
@@ -56,6 +58,7 @@ func Load(game global.Game) {
 		_s.ItemsEquipment = NewSearch(ff1.Items, ff1.Weapons, ff1.Shields, ff1.Armors, ff1.Helmets, ff1.Gloves)
 		_s.Jobs = NewSearch(ff1.Jobs)
 		_s.Maps = NewSearch(ff1.Maps)
+		_s.Bestiary = NewSearch(ff1.Bestiary)
 	} else if game == global.Two {
 		_s.Abilities = newSearchFF2(ff2.Abilities)
 		_s.Commands = NewSearch(ff2.Commands)
@@ -64,6 +67,7 @@ func Load(game global.Game) {
 		_s.Items = NewSearch(ff2.Items)
 		_s.Jobs = NewSearch(ff2.Jobs)
 		_s.Maps = NewSearch(ff2.Maps)
+		_s.Bestiary = NewSearch(ff2.Bestiary)
 	} else if game == global.Three {
 		_s.Abilities = NewSearch(ff3.Abilities, ff3.WhiteMagic, ff3.BlackMagic, ff3.SummonMagic)
 		_s.Commands = NewSearch(ff3.Commands)
@@ -73,6 +77,7 @@ func Load(game global.Game) {
 		_s.ItemsEquipment = NewSearch(ff3.Items, ff3.Weapons, ff3.Shields, ff3.Armors, ff3.Helmets, ff3.Hands)
 		_s.Jobs = NewSearch(ff3.Jobs)
 		_s.Maps = NewSearch(ff3.Maps)
+		_s.Bestiary = NewSearch(ff3.Bestiary)
 	} else if game == global.Four {
 		_s.Abilities = NewSearch(ff4.Abilities, ff4.WhiteMagic, ff4.BlackMagic, ff4.SummonMagic)
 		_s.Commands = NewSearch(ff4.Commands)
@@ -82,6 +87,7 @@ func Load(game global.Game) {
 		_s.ItemsEquipment = NewSearch(ff4.Items, ff4.Weapons, ff4.Shields, ff4.Armors, ff4.Helmets, ff4.Hands)
 		_s.Jobs = NewSearch(ff4.Jobs)
 		_s.Maps = NewSearch(ff4.Maps)
+		_s.Bestiary = NewSearch(ff4.Bestiary)
 	} else if game == global.Five {
 		_s.Abilities = NewSearch(ff5.Abilities, ff5.Spellblade, ff5.WhiteMagic, ff5.BlackMagic, ff5.SummonMagic, ff5.TimeMagic, ff5.BlueMagic, ff5.Songs)
 		_s.Commands = NewSearch(ff5.Commands)
@@ -98,6 +104,7 @@ func Load(game global.Game) {
 		_s.ItemsEquipment = NewSearch(ff6.Items, ff6.Weapons, ff6.Shields, ff6.Armors, ff6.Helmets, ff6.Hands)
 		_s.Jobs = NewSearch(ff6.Jobs)
 		_s.Maps = NewSearch(ff6.Maps)
+		_s.Bestiary = NewSearch(ff6.Bestiary)
 	}
 }
 
@@ -106,6 +113,7 @@ func NewSearch(nvss ...[]models.NameValue) *Search {
 		Text:    widget.NewTextGrid(),
 		Input:   widget.NewEntry(),
 		Results: widget.NewTextGrid(),
+		Entries: &nvss[0],
 	}
 	s.onFilterChanged(nvss...)
 	var sb strings.Builder
@@ -181,4 +189,11 @@ func (s *Search) Fields() fyne.CanvasObject {
 		return container.NewStack()
 	}
 	return container.NewVScroll(s.Text)
+}
+
+func (s *Search) Count() (i int) {
+	if s.Entries != nil {
+		i = len(*s.Entries)
+	}
+	return
 }

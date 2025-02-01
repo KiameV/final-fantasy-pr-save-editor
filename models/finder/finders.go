@@ -34,6 +34,7 @@ type (
 		important  map[int]string
 		jobs       map[int]string
 		maps       map[int]string
+		bestiary   map[int]string
 	}
 )
 
@@ -50,6 +51,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff1.Items, ff1.Weapons, ff1.Shields, ff1.Armors, ff1.Helmets, ff1.Gloves),
 			jobs:      nameLookup(ff1.Jobs),
 			maps:      nameLookup(),
+			bestiary:  nameLookup(ff1.Bestiary),
 		}
 	} else if game == global.Two {
 		singletonFinder = &finders{
@@ -59,6 +61,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff2.Items, ff2.Weapons, ff2.Shields, ff2.Armors, ff2.Helmets, ff2.Gloves),
 			jobs:      nameLookup(ff2.Jobs),
 			maps:      nameLookup(ff2.Maps),
+			bestiary:  nameLookup(ff2.Bestiary),
 		}
 	} else if game == global.Three {
 		singletonFinder = &finders{
@@ -68,6 +71,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff3.Items, ff3.Weapons, ff3.Shields, ff3.Armors, ff3.Helmets, ff3.Hands),
 			jobs:      nameLookup(ff3.Jobs),
 			maps:      nameLookup(ff3.Maps),
+			bestiary:  nameLookup(ff3.Bestiary),
 		}
 	} else if game == global.Four {
 		singletonFinder = &finders{
@@ -77,6 +81,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff4.Items, ff4.Weapons, ff4.Shields, ff4.Armors, ff4.Helmets, ff4.Hands),
 			jobs:      nameLookup(ff4.Jobs),
 			maps:      nameLookup(ff4.Maps),
+			bestiary:  nameLookup(ff4.Bestiary),
 		}
 	} else if game == global.Five {
 		singletonFinder = &finders{
@@ -86,6 +91,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff5.Items, ff5.Weapons, ff5.Shields, ff5.Armors, ff5.Helmets, ff5.Hands),
 			jobs:      nameLookup(ff5.Jobs),
 			maps:      nameLookup(ff5.Maps),
+			bestiary:  nameLookup(),
 		}
 	} else { // Six
 		singletonFinder = &finders{
@@ -95,6 +101,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff6.Items, ff6.Weapons, ff6.Shields, ff6.Armors, ff6.Helmets, ff6.Hands),
 			jobs:      nameLookup(ff6.Jobs),
 			maps:      nameLookup(ff6.Maps),
+			bestiary:  nameLookup(ff6.Bestiary),
 		}
 	}
 	singletonFinder.characters = make(map[int]string)
@@ -171,6 +178,13 @@ func Maps(i int) (s string, b bool) {
 
 func (f finders) Maps(i int) (s string, b bool) {
 	s, b = f.maps[i]
+	return
+}
+
+func Bestiary(i int) (s string, b bool) { return singletonFinder.Bestiary(i) }
+
+func (f finders) Bestiary(i int) (s string, b bool) {
+	s, b = f.bestiary[i]
 	return
 }
 

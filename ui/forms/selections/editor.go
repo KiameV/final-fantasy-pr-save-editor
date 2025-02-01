@@ -14,8 +14,9 @@ import (
 type (
 	Editor struct {
 		widget.BaseWidget
-		game global.Game
-		save *core.Save
+		game     global.Game
+		save     *core.Save
+		renderer fyne.WidgetRenderer
 	}
 )
 
@@ -26,10 +27,7 @@ func NewEditor(game global.Game, save *core.Save) *Editor {
 	}
 	s.ExtendBaseWidget(s)
 	inputs.Load(game)
-	return s
-}
 
-func (s *Editor) CreateRenderer() fyne.WidgetRenderer {
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Characters", NewCharacters(s.save)),
 		container.NewTabItem("Inventory", NewInventory(s.save)),
@@ -38,8 +36,16 @@ func (s *Editor) CreateRenderer() fyne.WidgetRenderer {
 		container.NewTabItem("Transportation", editors.NewCoreTransportation(s.game, s.save.Transportations)),
 		container.NewTabItem("Misc", NewMisc(s.save.Misc)),
 	)
+	if !s.game.IsFive() && s.save.Bestiary != nil {
+		tabs.Append(container.NewTabItem("Bestiary", NewBestiary(s.save.Bestiary)))
+	}
 	if s.game.IsSix() {
 		tabs.Append(container.NewTabItem("Espers", editors.NewEspers(s.save)))
 	}
-	return widget.NewSimpleRenderer(tabs)
+	s.renderer = widget.NewSimpleRenderer(tabs)
+	return s
+}
+
+func (s *Editor) CreateRenderer() fyne.WidgetRenderer {
+	return s.renderer
 }

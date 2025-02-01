@@ -1,24 +1,28 @@
 package save
 
 import (
+	"encoding/json"
+
 	oj "github.com/virtuald/go-ordered-json"
 	"pixel-remastered-save-editor/global"
 )
 
 type (
 	Data struct {
-		ID                  int         `json:"id"`
-		PictureData         string      `json:"pictureData"`
-		UserDataInternal    string      `json:"userData"`
-		ConfigDataInternal  string      `json:"configData"`
-		DataStorageInternal string      `json:"dataStorage"`
-		MapDataInternal     string      `json:"mapData"`
-		TimeStamp           string      `json:"timeStamp"`
-		PlayTime            float64     `json:"playTime"`
-		ClearFlag           int         `json:"clearFlag"`
-		IsCompleteFlag      int         `json:"isCompleteFlag"`
-		Trimmed             []byte      `json:"-"`
-		Game                global.Game `json:"-"`
+		ID                   int         `json:"id"`
+		PictureData          string      `json:"pictureData"`
+		UserDataInternal     string      `json:"userData"`
+		ConfigDataInternal   string      `json:"configData"`
+		DataStorageInternal  string      `json:"dataStorage"`
+		MapDataInternal      string      `json:"mapData"`
+		TimeStamp            string      `json:"timeStamp"`
+		PlayTime             float64     `json:"playTime"`
+		ClearFlag            int         `json:"clearFlag"`
+		IsCompleteFlag       int         `json:"isCompleteFlag"`
+		Trimmed              []byte      `json:"-"`
+		Game                 global.Game `json:"-"`
+		BestiaryDataInternal *[]byte     `json:"-"`
+		BestiaryDataTrim     *[]byte     `json:"-"`
 	}
 	ConfigData struct {
 		ButtonType              int      `json:"buttonType"`
@@ -63,19 +67,24 @@ func New(game global.Game) *Data {
 	}
 }
 
-func (d *Data) Unpack() (ud *UserData, md *MapData, ds *DataStorage, err error) {
+func (d *Data) Unpack() (ud *UserData, md *MapData, ds *DataStorage, b *Bestiary, err error) {
 	if ud, err = d.UserData(); err == nil {
 		if md, err = d.MapData(); err == nil {
-			ds, err = d.DataStorage()
+			if ds, err = d.DataStorage(); err == nil {
+				b, _ = d.Bestiary()
+			}
 		}
 	}
 	return
 }
 
-func (d *Data) Pack(slot int, ud *UserData, md *MapData, ds *DataStorage) (data *Data, err error) {
+func (d *Data) Pack(slot int, ud *UserData, md *MapData, ds *DataStorage, b *Bestiary) (data *Data, err error) {
 	if err = d.SetUserData(ud); err == nil {
 		if err = d.SetMapData(md); err == nil {
 			if err = d.SetDataStorage(ds); err == nil {
+				if b != nil {
+					_ = d.SetBestiary(b)
+				}
 				data = d
 				data.ID = slot
 			}
@@ -99,6 +108,26 @@ func (d *Data) DataStorage() (v *DataStorage, err error) {
 
 func (d *Data) SetDataStorage(v *DataStorage) (err error) {
 	d.DataStorageInternal, err = MarshalOne[DataStorage](v)
+	return
+}
+
+func (d *Data) Bestiary() (b *Bestiary, err error) {
+	if d.BestiaryDataTrim != nil {
+		b = &Bestiary{}
+		if err = json.Unmarshal(*d.BestiaryDataInternal, b); err != nil {
+			b = nil
+		}
+	}
+	return
+}
+
+func (d *Data) SetBestiary(b *Bestiary) (err error) {
+	if b != nil {
+		var i []byte
+		if i, err = json.Marshal(*b); err == nil {
+			d.BestiaryDataInternal = &i
+		}
+	}
 	return
 }
 

@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -145,7 +144,7 @@ func (g *gui) gameSelected(game global.Game) {
 		defer func() { g.open.Disabled = false }()
 		// Load file
 		config.SetSaveDir(game, dir)
-		if data, err := file.LoadSave(game, filepath.Join(dir, f), saveType); err != nil {
+		if data, err := file.LoadSave(game, dir, f, saveType); err != nil {
 			if g.prev != nil {
 				g.canvas.RemoveAll()
 				g.canvas.Add(g.prev)
@@ -195,7 +194,7 @@ func (g *gui) Save() {
 			config.SetSaveDir(game, dir)
 			d, err := g.data.ToSave(game, slot)
 			if err == nil {
-				err = file.SaveSave(game, d, slot, filepath.Join(dir, f), saveType)
+				err = file.SaveSave(game, d, slot, dir, f, saveType)
 			}
 			if err != nil {
 				if g.prev != nil {

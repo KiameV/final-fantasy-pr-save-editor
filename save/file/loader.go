@@ -16,13 +16,20 @@ import (
 	"pixel-remastered-save-editor/save/config"
 )
 
-func LoadSave(game global.Game, fileName string, saveType global.SaveFileType) (data *save.Data, err error) {
+const bestiaryFile = "dp3fS2vqP7GDj8eF72YKqbT7FIAF=e7Shy2CsTITm2E="
+
+func LoadSave(game global.Game, dir string, fileName string, saveType global.SaveFileType) (data *save.Data, err error) {
 	var b []byte
 	data = save.New(game)
-	if b, data.Trimmed, err = loadFile(game, fileName, saveType); err != nil {
+	if b, data.Trimmed, err = loadFile(game, filepath.Join(dir, fileName), saveType); err != nil {
 		return
 	}
 	err = oj.Unmarshal(b, data)
+	var t []byte
+	if b, t, err = loadFile(game, filepath.Join(dir, bestiaryFile), saveType); err == nil {
+		data.BestiaryDataTrim = &t
+		data.BestiaryDataInternal = &b
+	}
 	return
 }
 
