@@ -5,6 +5,7 @@ Supports editing `Final Fantasy VI Pixel Remastered` Save files.
 - Inventory and Important items
 - Change Party members
 - Map data including player world/map/position/facing, Black Jack world/position/facing, and Falcon world/position/facing.
+- Bestiary and ability to mark every mob as being defeated
 
 Known Issue:
 Better multi-lingual support is coming with an update for the GUI API. For now, if a certain language is needed, download a TTF of that language and place it in the same directory as `FFVIPR Save Editor.exe` and then start the application.
