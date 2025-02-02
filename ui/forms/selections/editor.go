@@ -36,7 +36,7 @@ func NewEditor(game global.Game, save *core.Save) *Editor {
 		container.NewTabItem("Transportation", editors.NewCoreTransportation(s.game, s.save.Transportations)),
 		container.NewTabItem("Misc", NewMisc(s.save.Misc)),
 	)
-	if !s.game.IsFive() && s.save.Bestiary != nil {
+	if s.save.Bestiary != nil {
 		tabs.Append(container.NewTabItem("Bestiary", NewBestiary(s.save.Bestiary)))
 	}
 	if s.game.IsSix() {

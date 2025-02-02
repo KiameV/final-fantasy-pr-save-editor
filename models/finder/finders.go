@@ -91,7 +91,7 @@ func Load(game global.Game, characters []*core.Character) {
 			items:     nameLookup(ff5.Items, ff5.Weapons, ff5.Shields, ff5.Armors, ff5.Helmets, ff5.Hands),
 			jobs:      nameLookup(ff5.Jobs),
 			maps:      nameLookup(ff5.Maps),
-			bestiary:  nameLookup(),
+			bestiary:  nameLookup(ff5.Bestiary),
 		}
 	} else { // Six
 		singletonFinder = &finders{

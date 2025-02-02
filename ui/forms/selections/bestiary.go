@@ -28,5 +28,4 @@ func (b *Bestiary) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(
 		bestiary.NewCore(b.bestiary, finder.Bestiary, inputs.GetSearches().Bestiary),
 	)
-
 }

@@ -5,7 +5,8 @@ import (
 )
 
 var (
-	Bestiary = []models.NameValue{models.NewValueName(1, "Goblin"),
+	Bestiary = []models.NameValue{
+		models.NewValueName(1, "Goblin"),
 		models.NewValueName(2, "Basilisk"),
 		models.NewValueName(3, "Helldiver"),
 		models.NewValueName(4, "Floating Eyeball"),

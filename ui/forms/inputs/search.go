@@ -96,6 +96,7 @@ func Load(game global.Game) {
 		_s.ItemsEquipment = NewSearch(ff5.Items, ff5.Weapons, ff5.Shields, ff5.Armors, ff5.Helmets, ff5.Hands)
 		_s.Jobs = NewSearch(ff5.Jobs)
 		_s.Maps = NewSearch(ff5.Maps)
+		_s.Bestiary = NewSearch(ff5.Bestiary)
 	} else { // Six
 		_s.Abilities = NewSearch(ff6.Blitzes, ff6.Bushidos, ff6.Dances, ff6.Lores, ff6.Rages, ff6.Magic)
 		_s.Commands = NewSearch(ff6.Commands)
