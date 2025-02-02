@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/widget"
 	"pixel-remastered-save-editor/browser"
 	"pixel-remastered-save-editor/global"
 	"pixel-remastered-save-editor/models/core"
@@ -111,7 +112,8 @@ func New() Gui {
 			g.open,
 			fyne.NewMenuItemSeparator(),
 			g.save,
-		)))
+		),
+		createSupportMenu(g.window)))
 	g.window.Resize(fyne.NewSize(float32(global.WindowWidth), float32(global.WindowHeight)))
 	return g
 }
@@ -241,4 +243,30 @@ func (m menuItem) Enable() {
 
 func (m menuItem) OnSelected(f func()) {
 	m.onSelected = f
+}
+
+func createSupportMenu(w fyne.Window) *fyne.Menu {
+	txt := fmt.Sprintf(`
+## Final Fantasy Pixel Remastered Save Editor %s
+---
+Written by [Kiame Vivacity](https://github.com/kiamev)
+### Support Me:
+- [Patreon: https://www.patreon.com/kiamev](https://ko-fi.com/kiamev)
+- [Ko-fi: https://ko-fi.com/kiamev](https://ko-fi.com/kiamev)
+---
+### Contributors:
+- Yosituna for compiling FF I - V game data
+- Fallacies for compiling FF VI game data
+- Silvris for figuring out how to decrypt saves
+- Scyllinice for helping build out the bestiaries
+`,
+		browser.Version)
+
+	m := fyne.NewMenu("Support Project")
+	m.Items = append(m.Items, fyne.NewMenuItem("About", func() {
+		dialog.ShowCustom("About", "ok", container.NewBorder(
+			widget.NewRichTextFromMarkdown(txt), nil, nil, nil,
+		), w)
+	}))
+	return m
 }
