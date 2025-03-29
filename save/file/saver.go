@@ -26,13 +26,13 @@ func SaveSave(game global.Game, data *save.Data, slot int, dir string, file stri
 	}
 
 	if err = saveFile(game, out, dir, file, data.Trimmed, saveType); err == nil {
-		if data.BestiaryDataInternal != nil && len(*data.BestiaryDataInternal) > 0 {
-			var trim []byte
-			if data.BestiaryDataTrim != nil && len(*data.BestiaryDataTrim) > 0 {
-				trim = *data.BestiaryDataTrim
-			}
-			_ = saveFile(game, *data.BestiaryDataInternal, dir, bestiaryFile, trim, saveType)
-		}
+		// if data.BestiaryDataInternal != nil && len(*data.BestiaryDataInternal) > 0 {
+		// 	var trim []byte
+		// 	if data.BestiaryDataTrim != nil && len(*data.BestiaryDataTrim) > 0 {
+		// 		trim = *data.BestiaryDataTrim
+		// 	}
+		// 	_ = saveFile(game, *data.BestiaryDataInternal, dir, bestiaryFile, trim, saveType)
+		// }
 		err = nil
 	}
 	return
